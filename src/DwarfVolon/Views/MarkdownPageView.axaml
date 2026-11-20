@@ -1,0 +1,16 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:DwarfVolon.ViewModels"
+             xmlns:controls="using:DwarfVolon.Controls"
+             x:Class="DwarfVolon.Views.MarkdownPageView"
+             x:DataType="vm:MarkdownPageViewModel">
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="8" Margin="28,16,28,0" HorizontalAlignment="Right">
+            <TextBlock x:Name="CopiedText" Classes="hint" VerticalAlignment="Center" />
+            <Button Content="Copiar Markdown" Click="Copy_Click" ToolTip.Tip="Copia o texto em Markdown para colar numa IA ou num documento" />
+        </StackPanel>
+        <ScrollViewer>
+            <controls:MarkdownView Margin="28,0,28,28" MaxWidth="900" HorizontalAlignment="Left" Markdown="{Binding Markdown}" />
+        </ScrollViewer>
+    </DockPanel>
+</UserControl>

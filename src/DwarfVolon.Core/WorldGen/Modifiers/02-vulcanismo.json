@@ -1,0 +1,40 @@
+{
+  "id": "vulcanismo",
+  "name": "Vulcanismo",
+  "icon": "🌋",
+  "order": 20,
+  "description": "Vulcões levam magma até a superfície: forjas e fundições a magma sem cavar fundo. Vulcões só nascem em pontos com vulcanismo 100, então os níveis mudam a distribuição do vulcanismo, não só o mínimo exigido.",
+  "options": [
+    {
+      "id": "menos", "name": "Menos", "titleTag": "POUCOS VULCOES",
+      "description": "Nenhum vulcão obrigatório e metade do peso para vulcanismo muito alto.",
+      "operations": [
+        { "token": "VOLCANO_MIN", "set": [0] },
+        { "token": "VOLCANISM_FREQUENCY", "set": [null, 2, 2, 2, 2, 1] }
+      ]
+    },
+    { "id": "padrao", "name": "Padrão", "isDefault": true, "description": "Pelo menos 3 vulcões num mundo médio." },
+    {
+      "id": "mais", "name": "Mais vulcões", "titleTag": "MAIS VULCOES",
+      "description": "3x mais peso para vulcanismo muito alto (onde nascem vulcões) e pelo menos 9 vulcões num mundo médio.",
+      "notes": ["Para o mar de magma ficar mais raso, combine com Camadas de caverna = 1 ou 2."],
+      "operations": [
+        { "token": "VOLCANISM", "set": [null, 100] },
+        { "token": "VOLCANISM_FREQUENCY", "set": [null, 1, 1, 1, 1, 3] },
+        { "token": "VOLCANISM_RANGES", "multiply": [0.8, 0.6, 1] },
+        { "token": "VOLCANO_MIN", "multiply": [3], "min": [5], "max": [200] }
+      ]
+    },
+    {
+      "id": "muito", "name": "Terra vulcânica", "titleTag": "VULCANICO",
+      "description": "6x mais peso para vulcanismo muito alto e pelo menos 18 vulcões num mundo médio.",
+      "notes": ["Exige bem mais vulcões que o padrão: é o nível com mais chance de o jogo rejeitar alguns mapas antes de aceitar um."],
+      "operations": [
+        { "token": "VOLCANISM", "set": [null, 100] },
+        { "token": "VOLCANISM_FREQUENCY", "set": [null, 1, 1, 1, 1, 6] },
+        { "token": "VOLCANISM_RANGES", "multiply": [0.6, 0.5, 1] },
+        { "token": "VOLCANO_MIN", "multiply": [6], "min": [10], "max": [200] }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>DwarfVolon.Core</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="WorldGen\Modifiers\*.json" LogicalName="DwarfVolon.Core.WorldGen.Modifiers.%(Filename)%(Extension)" />
+    <EmbeddedResource Include="WorldGen\Resources\*.txt" LogicalName="DwarfVolon.Core.WorldGen.Resources.%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Embark\Resources\*.json" LogicalName="DwarfVolon.Core.Embark.Resources.%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="DwarfVolon.Core.Tests" />
+  </ItemGroup>
+
+</Project>

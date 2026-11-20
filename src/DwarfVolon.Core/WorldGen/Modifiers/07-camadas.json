@@ -1,0 +1,20 @@
+{
+  "id": "camadas",
+  "name": "Camadas de caverna",
+  "icon": "🪨",
+  "order": 70,
+  "description": "Quantas camadas de caverna existem antes do mar de magma. Menos camadas = menos frentes para defender e magma mais perto.",
+  "options": [
+    {
+      "id": "uma", "name": "1 camada", "titleTag": "1 CAVERNA",
+      "description": "Só a primeira caverna: um único andar subterrâneo para isolar.",
+      "operations": [ { "token": "CAVERN_LAYER_COUNT", "set": [1] } ]
+    },
+    {
+      "id": "duas", "name": "2 camadas", "titleTag": "2 CAVERNAS",
+      "description": "Duas cavernas em vez de três.",
+      "operations": [ { "token": "CAVERN_LAYER_COUNT", "set": [2] } ]
+    },
+    { "id": "padrao", "name": "3 camadas (padrão)", "isDefault": true, "description": "As três camadas de caverna do jogo." }
+  ]
+}

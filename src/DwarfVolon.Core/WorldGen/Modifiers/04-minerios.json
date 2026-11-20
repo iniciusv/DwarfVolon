@@ -1,0 +1,25 @@
+{
+  "id": "minerios",
+  "name": "Minérios",
+  "icon": "⛏️",
+  "order": 40,
+  "description": "Quantidade de veios de minério e gemas no subsolo.",
+  "options": [
+    {
+      "id": "escassos", "name": "Escassos", "titleTag": "POUCO MINERIO",
+      "description": "Metade dos minérios. Metal vira recurso disputado.",
+      "operations": [ { "token": "MINERAL_SCARCITY", "set": [5000] } ]
+    },
+    { "id": "padrao", "name": "Padrão", "isDefault": true, "description": "Escassez 2500, como no jogo." },
+    {
+      "id": "abundantes", "name": "Abundantes", "titleTag": "MINERIOS",
+      "description": "Cerca de 3x mais minério.",
+      "operations": [ { "token": "MINERAL_SCARCITY", "set": [800] } ]
+    },
+    {
+      "id": "muito", "name": "Muito abundantes", "titleTag": "MUITO MINERIO",
+      "description": "Cerca de 10x mais minério: veios em quase todo lugar.",
+      "operations": [ { "token": "MINERAL_SCARCITY", "set": [250] } ]
+    }
+  ]
+}

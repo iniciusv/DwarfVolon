@@ -1,0 +1,40 @@
+{
+  "id": "cavernas",
+  "name": "Cavernas",
+  "icon": "🕳️",
+  "order": 60,
+  "description": "Formato das cavernas subterrâneas. O jogo não tem parâmetro de altura; o que muda é o tamanho das câmaras (abertura) e quantas passagens as ligam.",
+  "options": [
+    {
+      "id": "fechadas", "name": "Mais fechadas", "titleTag": "CAVERNAS FECHADAS",
+      "description": "Câmaras pequenas e poucas passagens: menos entradas para murar e controlar o acesso.",
+      "operations": [
+        { "token": "CAVERN_LAYER_OPENNESS_MIN", "set": [0] },
+        { "token": "CAVERN_LAYER_OPENNESS_MAX", "set": [20] },
+        { "token": "CAVERN_LAYER_PASSAGE_DENSITY_MIN", "set": [0] },
+        { "token": "CAVERN_LAYER_PASSAGE_DENSITY_MAX", "set": [25] }
+      ]
+    },
+    { "id": "padrao", "name": "Padrão", "isDefault": true, "description": "Abertura e passagens variando de 0 a 100." },
+    {
+      "id": "abertas", "name": "Mais abertas", "titleTag": "CAVERNAS ABERTAS",
+      "description": "Câmaras grandes e muitas passagens: ótimo para explorar, difícil de isolar.",
+      "notes": ["Cavernas abertas também facilitam a vinda de criaturas do subsolo."],
+      "operations": [
+        { "token": "CAVERN_LAYER_OPENNESS_MIN", "set": [40] },
+        { "token": "CAVERN_LAYER_OPENNESS_MAX", "set": [100] },
+        { "token": "CAVERN_LAYER_PASSAGE_DENSITY_MIN", "set": [40] }
+      ]
+    },
+    {
+      "id": "umidas", "name": "Abertas e úmidas", "titleTag": "CAVERNAS UMIDAS",
+      "description": "Como Mais abertas, com bem mais água: lagos subterrâneos para pesca e irrigação.",
+      "operations": [
+        { "token": "CAVERN_LAYER_OPENNESS_MIN", "set": [40] },
+        { "token": "CAVERN_LAYER_OPENNESS_MAX", "set": [100] },
+        { "token": "CAVERN_LAYER_PASSAGE_DENSITY_MIN", "set": [40] },
+        { "token": "CAVERN_LAYER_WATER_MIN", "set": [50] }
+      ]
+    }
+  ]
+}

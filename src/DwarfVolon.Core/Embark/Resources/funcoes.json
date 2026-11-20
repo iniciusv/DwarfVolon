@@ -1,0 +1,80 @@
+{
+  "description": "Funções importantes no início da fortaleza. 'attributes' são os atributos que ajudam a habilidade (aproximado, a partir da wiki do DF). 'priority' menor = escolhida antes; 'count' = quantos anões nessa função.",
+  "roles": [
+    {
+      "id": "minerador", "name": "Minerador", "skill": "MINING", "priority": 1, "count": 2,
+      "attributes": ["STRENGTH", "AGILITY", "ENDURANCE", "WILLPOWER", "SPATIAL_SENSE", "KINESTHETIC_SENSE"],
+      "why": "Cava a fortaleza. Dois mineradores aceleram muito o começo."
+    },
+    {
+      "id": "carpinteiro", "name": "Carpinteiro", "skill": "CARPENTRY", "priority": 2,
+      "attributes": ["STRENGTH", "AGILITY", "SPATIAL_SENSE", "KINESTHETIC_SENSE"],
+      "why": "Camas, barris e baldes: tudo de madeira que a fortaleza precisa no primeiro ano."
+    },
+    {
+      "id": "agricultor", "name": "Agricultor", "skill": "PLANT", "priority": 2,
+      "attributes": ["STRENGTH", "AGILITY", "ENDURANCE", "KINESTHETIC_SENSE"],
+      "why": "Plantar cogumelos no subsolo garante comida e bebida."
+    },
+    {
+      "id": "pedreiro", "name": "Pedreiro", "skill": "MASONRY", "priority": 3,
+      "attributes": ["STRENGTH", "AGILITY", "ENDURANCE", "SPATIAL_SENSE", "KINESTHETIC_SENSE"],
+      "why": "Portas, mesas e cadeiras de pedra; usa a pedra que os mineradores tiram."
+    },
+    {
+      "id": "lenhador", "name": "Lenhador", "skill": "WOODCUTTING", "priority": 3,
+      "attributes": ["STRENGTH", "AGILITY", "ENDURANCE", "WILLPOWER", "SPATIAL_SENSE", "KINESTHETIC_SENSE"],
+      "why": "Madeira para o carpinteiro e para carvão."
+    },
+    {
+      "id": "cervejeiro", "name": "Cervejeiro", "skill": "BREWING", "priority": 4,
+      "attributes": ["STRENGTH", "AGILITY", "KINESTHETIC_SENSE"],
+      "why": "Anões sem álcool ficam lentos e infelizes."
+    },
+    {
+      "id": "medico", "name": "Médico", "skill": "DIAGNOSE", "priority": 4,
+      "attributes": ["ANALYTICAL_ABILITY", "MEMORY", "INTUITION"],
+      "why": "Sem diagnóstico, ferimentos simples viram mortes."
+    },
+    {
+      "id": "mecanico", "name": "Mecânico", "skill": "MECHANICS", "priority": 5,
+      "attributes": ["STRENGTH", "AGILITY", "ANALYTICAL_ABILITY", "SPATIAL_SENSE", "KINESTHETIC_SENSE"],
+      "why": "Armadilhas, alavancas e pontes levadiças para defesa."
+    },
+    {
+      "id": "cozinheiro", "name": "Cozinheiro", "skill": "COOK", "priority": 5,
+      "attributes": ["AGILITY", "ANALYTICAL_ABILITY", "CREATIVITY", "KINESTHETIC_SENSE"],
+      "why": "Refeições preparadas valem mais e deixam os anões felizes."
+    },
+    {
+      "id": "herbalista", "name": "Herbalista", "skill": "HERBALISM", "priority": 6,
+      "attributes": ["AGILITY", "MEMORY", "KINESTHETIC_SENSE"],
+      "why": "Coleta plantas e sementes da superfície no começo."
+    },
+    {
+      "id": "negociante", "name": "Negociante", "skill": "APPRAISAL", "priority": 6,
+      "attributes": ["ANALYTICAL_ABILITY", "MEMORY", "INTUITION"],
+      "why": "Ver o valor das mercadorias na primeira caravana."
+    },
+    {
+      "id": "gravador", "name": "Gravador", "skill": "ENGRAVE_STONE", "priority": 7,
+      "attributes": ["AGILITY", "CREATIVITY", "SPATIAL_SENSE", "KINESTHETIC_SENSE"],
+      "why": "Gravuras deixam os cômodos valiosos (bons pensamentos)."
+    },
+    {
+      "id": "artesao", "name": "Artesão de pedra", "skill": "STONECRAFT", "priority": 7,
+      "attributes": ["STRENGTH", "AGILITY", "CREATIVITY", "KINESTHETIC_SENSE"],
+      "why": "Artigos de pedra para trocar com as caravanas."
+    },
+    {
+      "id": "pescador", "name": "Pescador", "skill": "FISH", "priority": 8,
+      "attributes": ["STRENGTH", "AGILITY", "FOCUS", "PATIENCE", "KINESTHETIC_SENSE"],
+      "why": "Comida extra se houver rio ou lago."
+    },
+    {
+      "id": "guarda", "name": "Guarda (machado)", "skill": "AXE", "priority": 8,
+      "attributes": ["STRENGTH", "AGILITY", "TOUGHNESS", "ENDURANCE", "SPATIAL_SENSE", "KINESTHETIC_SENSE"],
+      "why": "Um lutador para os primeiros animais hostis."
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:DwarfVolon.ViewModels"
+        xmlns:views="using:DwarfVolon.Views"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1320" d:DesignHeight="860"
+        x:Class="DwarfVolon.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Width="1400" Height="900" MinWidth="1000" MinHeight="620"
+        WindowStartupLocation="CenterScreen"
+        Title="DwarfVolon">
+
+    <!-- Cada página é um view-model; estes templates escolhem a view. -->
+    <Window.DataTemplates>
+        <DataTemplate DataType="vm:WorldGenEditorViewModel">
+            <views:WorldGenEditorView />
+        </DataTemplate>
+        <DataTemplate DataType="vm:SettingsViewModel">
+            <views:SettingsView />
+        </DataTemplate>
+        <DataTemplate DataType="vm:EmbarkViewModel">
+            <views:EmbarkView />
+        </DataTemplate>
+        <DataTemplate DataType="vm:MarkdownPageViewModel">
+            <views:MarkdownPageView />
+        </DataTemplate>
+    </Window.DataTemplates>
+
+    <DockPanel>
+        <Border DockPanel.Dock="Bottom" Classes="statusBar">
+            <TextBlock Text="{Binding Settings.SummaryText}" FontSize="12" Opacity="0.75" TextTrimming="CharacterEllipsis" />
+        </Border>
+
+        <Grid ColumnDefinitions="220,*">
+            <!-- Menu lateral -->
+            <Border Grid.Column="0" Classes="navRail">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top" Margin="20,20,20,16" Spacing="2">
+                        <TextBlock Text="DwarfVolon" FontSize="20" FontWeight="Bold" />
+                        <TextBlock Classes="hint" Text="Ferramentas para Dwarf Fortress" />
+                    </StackPanel>
+                    <ListBox Classes="nav" ItemsSource="{Binding NavItems}" SelectedItem="{Binding SelectedNav}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate x:DataType="vm:NavItemViewModel">
+                                <Grid ColumnDefinitions="32,*,Auto">
+                                    <TextBlock Grid.Column="0" Classes="emoji" FontSize="17" VerticalAlignment="Center" Text="{Binding Icon}" />
+                                    <TextBlock Grid.Column="1" VerticalAlignment="Center" Text="{Binding Title}" />
+                                    <Border Grid.Column="2" Classes="badge" IsVisible="{Binding HasBadge}">
+                                        <TextBlock Text="{Binding Badge}" />
+                                    </Border>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+            </Border>
+
+            <!-- Página atual -->
+            <ContentControl Grid.Column="1" Content="{Binding SelectedNav.Page}" />
+        </Grid>
+    </DockPanel>
+</Window>

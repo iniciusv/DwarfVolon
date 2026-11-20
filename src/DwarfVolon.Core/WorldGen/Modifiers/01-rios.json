@@ -1,0 +1,33 @@
+{
+  "id": "rios",
+  "name": "Rios",
+  "icon": "🌊",
+  "order": 10,
+  "description": "Quantidade de rios. O jogo não rejeita mundos por falta de rios, então mudar só as nascentes é seguro.",
+  "options": [
+    {
+      "id": "poucos", "name": "Poucos", "titleTag": "POUCOS RIOS",
+      "description": "40% das nascentes. Achar rio no embarque fica difícil.",
+      "operations": [
+        { "token": "RIVER_MINS", "multiply": [0.4, 0.4] }
+      ]
+    },
+    { "id": "padrao", "name": "Padrão", "isDefault": true, "description": "100 nascentes de rio num mundo médio, como no jogo." },
+    {
+      "id": "mais", "name": "Mais rios", "titleTag": "MAIS RIOS",
+      "description": "3x mais nascentes de rio. Só mexe nas nascentes: não aumenta a chance de rejeição.",
+      "operations": [
+        { "token": "RIVER_MINS", "multiply": [3, 3] }
+      ]
+    },
+    {
+      "id": "muitos", "name": "Muitos rios", "titleTag": "MUITOS RIOS",
+      "description": "4x mais nascentes e um pouco mais de erosão (vales mais marcados).",
+      "notes": ["Rios nascem em terreno alto: com Relevo = Mais planícies o jogo pode criar menos rios do que o pedido (o mundo não é rejeitado por isso)."],
+      "operations": [
+        { "token": "RIVER_MINS", "multiply": [4, 4] },
+        { "token": "EROSION_CYCLE_COUNT", "multiply": [1.2] }
+      ]
+    }
+  ]
+}

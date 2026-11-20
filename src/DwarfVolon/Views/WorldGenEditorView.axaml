@@ -1,0 +1,265 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:DwarfVolon.ViewModels"
+             xmlns:controls="using:DwarfVolon.Controls"
+             x:Class="DwarfVolon.Views.WorldGenEditorView"
+             x:DataType="vm:WorldGenEditorViewModel">
+    <Grid ColumnDefinitions="*,340">
+
+        <!-- Coluna principal -->
+        <DockPanel Grid.Column="0">
+            <StackPanel DockPanel.Dock="Top" Margin="28,20,28,4" Spacing="4">
+                <TextBlock Classes="h1" Text="Gerador de mundo" />
+                <TextBlock Classes="hint" FontSize="13"
+                           Text="Escolha como quer o mundo em cada categoria. O DwarfVolon ajusta os parâmetros por você; a aba Avançado mostra todos eles." />
+            </StackPanel>
+
+            <TabControl Classes="sub" Margin="16,0,0,0" SelectedIndex="{Binding SelectedTabIndex}">
+
+                <!-- Simples -->
+                <TabItem Header="Simples">
+                    <ScrollViewer>
+                        <StackPanel Margin="12,8,16,24" Spacing="16">
+
+                            <StackPanel Spacing="8">
+                                <TextBlock Classes="h2" Text="Perfis rápidos" />
+                                <ItemsControl ItemsSource="{Binding Profiles}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:ProfileViewModel">
+                                            <Button Classes="pill" Classes.active="{Binding IsActive}" Margin="0,0,8,8"
+                                                    Command="{Binding ApplyCommand}" ToolTip.Tip="{Binding Description}">
+                                                <TextBlock Text="{Binding Name}" />
+                                            </Button>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+
+                            <ItemsControl ItemsSource="{Binding Categories}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:ModifierCategoryViewModel">
+                                        <Border Classes="modCard" Classes.modified="{Binding IsModified}">
+                                            <StackPanel Spacing="8">
+                                                <Grid ColumnDefinitions="Auto,*,Auto">
+                                                    <TextBlock Grid.Column="0" Classes="emoji" FontSize="24" Margin="0,0,10,0"
+                                                               VerticalAlignment="Center" Text="{Binding Icon}" />
+                                                    <TextBlock Grid.Column="1" Classes="h2" VerticalAlignment="Center" Text="{Binding Name}" />
+                                                    <Border Grid.Column="2" Classes="badge accent" IsVisible="{Binding IsModified}" VerticalAlignment="Center">
+                                                        <TextBlock Text="alterado" />
+                                                    </Border>
+                                                </Grid>
+                                                <TextBlock Classes="hint" Text="{Binding Description}" />
+                                                <ListBox Classes="chips" AutoScrollToSelectedItem="False" ItemsSource="{Binding Options}" SelectedItem="{Binding SelectedOption}">
+                                                    <ListBox.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <WrapPanel />
+                                                        </ItemsPanelTemplate>
+                                                    </ListBox.ItemsPanel>
+                                                    <ListBox.ItemTemplate>
+                                                        <DataTemplate x:DataType="vm:ModifierOptionViewModel">
+                                                            <TextBlock Text="{Binding Name}" ToolTip.Tip="{Binding Description}" />
+                                                        </DataTemplate>
+                                                    </ListBox.ItemTemplate>
+                                                </ListBox>
+                                                <TextBlock FontSize="13" TextWrapping="Wrap" Text="{Binding SelectedOption.Description}" />
+                                                <TextBlock Classes="hint warn" Text="{Binding SelectedOption.Notes}" IsVisible="{Binding SelectedOption.HasNotes}" />
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+
+                <!-- Avançado -->
+                <TabItem Header="Avançado">
+                    <DockPanel Margin="12,8,24,0">
+                        <StackPanel DockPanel.Dock="Top" Spacing="8">
+                            <TextBlock Classes="hint"
+                                       Text="Todos os parâmetros do conjunto, já com os modificadores aplicados. Ajustes feitos aqui ficam guardados e são aplicados por cima dos modificadores." />
+                            <WrapPanel>
+                                <StackPanel Margin="0,0,16,8" Spacing="2">
+                                    <TextBlock Classes="hint" Text="Base (o tamanho do mundo vem dela)" />
+                                    <ComboBox Width="320" ItemsSource="{Binding BaseOptions}" SelectedItem="{Binding SelectedBase}">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:BaseOptionViewModel">
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Title}" />
+                                                    <TextBlock Classes="hint" Text="{Binding Detail}" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                </StackPanel>
+                                <Button Margin="0,0,8,8" VerticalAlignment="Bottom" Content="Desfazer ajustes manuais" Command="{Binding ClearManualEditsCommand}" />
+                                <Button Margin="0,0,8,8" VerticalAlignment="Bottom" Content="Recarregar arquivo do jogo" Command="{Binding ReloadBasesCommand}" />
+                                <Button Margin="0,0,8,8" VerticalAlignment="Bottom" Content="Pasta dos meus modificadores" Command="{Binding OpenUserModifiersFolderCommand}" />
+                                <Button Margin="0,0,8,8" VerticalAlignment="Bottom" Content="Recarregar modificadores" Command="{Binding ReloadModifiersCommand}" />
+                            </WrapPanel>
+                        </StackPanel>
+
+                        <TabControl Classes="sub">
+                            <TabItem Header="Parâmetros">
+                                <DockPanel>
+                                    <Grid DockPanel.Dock="Top" Margin="0,8" ColumnDefinitions="280,Auto,*">
+                                        <TextBox Grid.Column="0" Text="{Binding FilterText}" PlaceholderText="Filtrar (ex.: rio, VOLCANO, caverna)" />
+                                        <CheckBox Grid.Column="1" Margin="12,0,0,0" Content="Só os alterados" IsChecked="{Binding OnlyChanged}" />
+                                        <TextBlock Grid.Column="2" Margin="12,0,0,0" VerticalAlignment="Center" Opacity="0.7"
+                                                   TextTrimming="CharacterEllipsis" Text="{Binding SummaryText}" />
+                                    </Grid>
+                                    <ScrollViewer>
+                                        <ItemsControl Margin="0,0,0,16" ItemsSource="{Binding Groups}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="vm:TokenGroupViewModel">
+                                                    <Expander Margin="0,4" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                                              Header="{Binding Header}" IsExpanded="{Binding IsExpanded}" IsVisible="{Binding IsVisible}">
+                                                        <ItemsControl ItemsSource="{Binding Rows}">
+                                                            <ItemsControl.ItemTemplate>
+                                                                <DataTemplate x:DataType="vm:TokenRowViewModel">
+                                                                    <Border Classes="tokenRow" Classes.changed="{Binding IsChanged}"
+                                                                            IsVisible="{Binding IsVisible}" ToolTip.Tip="{Binding Description}">
+                                                                        <Grid ColumnDefinitions="240,*">
+                                                                            <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,12,0">
+                                                                                <TextBlock FontWeight="SemiBold" TextWrapping="Wrap" Text="{Binding DisplayName}" />
+                                                                                <TextBlock Classes="mono" Text="{Binding TokenLabel}" />
+                                                                                <TextBlock Classes="mono" Text="{Binding BaseText}" IsVisible="{Binding IsChanged}" />
+                                                                            </StackPanel>
+                                                                            <ItemsControl Grid.Column="1" ItemsSource="{Binding Args}">
+                                                                                <ItemsControl.ItemsPanel>
+                                                                                    <ItemsPanelTemplate>
+                                                                                        <WrapPanel />
+                                                                                    </ItemsPanelTemplate>
+                                                                                </ItemsControl.ItemsPanel>
+                                                                                <ItemsControl.ItemTemplate>
+                                                                                    <DataTemplate x:DataType="vm:ArgViewModel">
+                                                                                        <StackPanel Margin="0,0,12,4" Spacing="2" ToolTip.Tip="{Binding ToolTip}">
+                                                                                            <TextBlock FontSize="11" Opacity="0.7" Text="{Binding Label}" />
+                                                                                            <TextBox Width="100" Text="{Binding Value}" IsVisible="{Binding IsTextual}"
+                                                                                                     Classes.error="{Binding HasError}" Classes.argChanged="{Binding IsChanged}" />
+                                                                                            <CheckBox IsChecked="{Binding BoolValue}" IsVisible="{Binding IsFlag}" />
+                                                                                            <ComboBox MinWidth="170" ItemsSource="{Binding Choices}" SelectedItem="{Binding Value}"
+                                                                                                      IsVisible="{Binding IsChoice}" />
+                                                                                        </StackPanel>
+                                                                                    </DataTemplate>
+                                                                                </ItemsControl.ItemTemplate>
+                                                                            </ItemsControl>
+                                                                        </Grid>
+                                                                    </Border>
+                                                                </DataTemplate>
+                                                            </ItemsControl.ItemTemplate>
+                                                        </ItemsControl>
+                                                    </Expander>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </ScrollViewer>
+                                </DockPanel>
+                            </TabItem>
+
+                            <TabItem Header="O que mudou">
+                                <ScrollViewer>
+                                    <SelectableTextBlock Margin="0,12" FontFamily="Cascadia Mono,Consolas,Menlo,monospace" FontSize="12"
+                                                         TextWrapping="Wrap" Text="{Binding ChangeLog}" />
+                                </ScrollViewer>
+                            </TabItem>
+
+                            <TabItem Header="Markdown">
+                                <DockPanel>
+                                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="8" Margin="0,8">
+                                        <Button Content="Copiar resumo" Click="CopySummary_Click"
+                                                ToolTip.Tip="Resumo deste mundo em Markdown, pronto para colar numa IA" />
+                                        <Button Content="Copiar catálogo de modificadores" Click="CopyCatalog_Click"
+                                                ToolTip.Tip="Todas as categorias e níveis disponíveis, em Markdown: dá contexto para a IA sugerir escolhas" />
+                                        <TextBlock x:Name="CopiedAdvancedText" Classes="hint" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                    <ScrollViewer>
+                                        <controls:MarkdownView Margin="0,0,0,24" Markdown="{Binding MarkdownSummary}" />
+                                    </ScrollViewer>
+                                </DockPanel>
+                            </TabItem>
+
+                            <TabItem Header="Texto gerado">
+                                <TextBox Margin="0,12" IsReadOnly="True" AcceptsReturn="True" FontSize="12"
+                                         FontFamily="Cascadia Mono,Consolas,Menlo,monospace" Text="{Binding PreviewText}" />
+                            </TabItem>
+                        </TabControl>
+                    </DockPanel>
+                </TabItem>
+            </TabControl>
+        </DockPanel>
+
+        <!-- Painel de resumo e salvar -->
+        <Border Grid.Column="1" Classes="summaryPanel">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Bottom" Margin="20" Spacing="8">
+                    <TextBlock Classes="hint" Text="Título (é o nome que aparece no jogo)" />
+                    <TextBox Text="{Binding NewTitle}" />
+                    <TextBlock Classes="hint warn" Text="{Binding TitleWarning}" IsVisible="{Binding HasTitleWarning}" />
+                    <Button Classes="accent" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="0,10"
+                            Command="{Binding SaveCommand}">
+                        <TextBlock Text="Salvar no jogo" FontWeight="SemiBold" />
+                    </Button>
+                    <SelectableTextBlock FontSize="12" TextWrapping="Wrap" Text="{Binding StatusMessage}" />
+                    <TextBlock Classes="hint"
+                               Text="No jogo: Create New World → Design New World with Advanced Parameters → escolha o título." />
+                    <WrapPanel>
+                        <Button Margin="0,0,8,8" Content="Abrir pasta prefs" Command="{Binding OpenPrefsFolderCommand}" />
+                        <Button Margin="0,0,8,8" Content="Copiar Markdown" Click="CopySummary_Click"
+                                ToolTip.Tip="Resumo deste mundo em Markdown, pronto para colar numa IA" />
+                    </WrapPanel>
+                    <TextBlock x:Name="CopiedText" Classes="hint" />
+                    <TextBlock Classes="hint" FontSize="11" Text="{Binding TargetFileText}" />
+                </StackPanel>
+
+                <ScrollViewer>
+                    <StackPanel Margin="20,20,20,0" Spacing="10">
+                        <TextBlock Classes="h2" Text="Resumo" />
+                        <TextBlock Classes="hint" Text="{Binding BaseText, StringFormat='Base: {0}'}" />
+
+                        <TextBlock FontSize="13" Opacity="0.8" TextWrapping="Wrap" IsVisible="{Binding HasNoChanges}"
+                                   Text="Tudo no padrão: o mundo sai igual ao padrão do jogo." />
+                        <ItemsControl ItemsSource="{Binding SummaryLines}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:SummaryLine">
+                                    <Grid ColumnDefinitions="30,*" Margin="0,3">
+                                        <TextBlock Grid.Column="0" Classes="emoji" FontSize="16" Text="{Binding Icon}" />
+                                        <StackPanel Grid.Column="1">
+                                            <TextBlock Classes="hint" Text="{Binding Category}" />
+                                            <TextBlock FontWeight="SemiBold" Text="{Binding Option}" />
+                                        </StackPanel>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock Classes="hint" Text="{Binding ManualEditsText}" IsVisible="{Binding HasManualEdits}" />
+
+                        <Border Classes="riskBox" Classes.low="{Binding IsRiskLow}" Classes.medium="{Binding IsRiskMedium}" Classes.high="{Binding IsRiskHigh}">
+                            <StackPanel Spacing="4">
+                                <TextBlock FontWeight="SemiBold" Text="{Binding RiskText}" />
+                                <TextBlock Classes="hint" Text="{Binding RiskDetails}" />
+                            </StackPanel>
+                        </Border>
+
+                        <TextBlock Classes="hint warn" Text="{Binding Warnings}" IsVisible="{Binding HasWarnings}" />
+
+                        <WrapPanel>
+                            <Button Margin="0,0,8,8" Content="Voltar tudo ao padrão" Command="{Binding ResetAllCommand}" />
+                            <Button Margin="0,0,8,8" Content="Ver parâmetros" Command="{Binding ShowAdvancedCommand}" />
+                        </WrapPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </DockPanel>
+        </Border>
+    </Grid>
+</UserControl>

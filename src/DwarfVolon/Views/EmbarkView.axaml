@@ -1,0 +1,28 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:DwarfVolon.ViewModels"
+             xmlns:controls="using:DwarfVolon.Controls"
+             x:Class="DwarfVolon.Views.EmbarkView"
+             x:DataType="vm:EmbarkViewModel">
+    <DockPanel>
+        <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="28,16,28,8">
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                <Button Classes="accent" Content="Atualizar" Command="{Binding RefreshCommand}"
+                        ToolTip.Tip="Lê de novo a tela de embarque do jogo" />
+                <CheckBox Content="Atualizar automaticamente" IsChecked="{Binding AutoRefresh}"
+                          ToolTip.Tip="Relê o jogo a cada 3 segundos enquanto ligado" />
+                <ProgressBar IsIndeterminate="True" Width="60" IsVisible="{Binding IsBusy}" />
+                <TextBlock VerticalAlignment="Center" Text="{Binding StatusText}" TextTrimming="CharacterEllipsis"
+                           Classes.hint="{Binding !HasError}" Classes.warn="{Binding HasError}" />
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                <TextBlock x:Name="CopiedText" Classes="hint" VerticalAlignment="Center" />
+                <Button Content="Copiar Markdown" Click="Copy_Click"
+                        ToolTip.Tip="Copia as tabelas em Markdown para colar numa IA" />
+            </StackPanel>
+        </Grid>
+        <ScrollViewer>
+            <controls:MarkdownView Margin="28,0,28,28" HorizontalAlignment="Left" Markdown="{Binding Markdown}" />
+        </ScrollViewer>
+    </DockPanel>
+</UserControl>

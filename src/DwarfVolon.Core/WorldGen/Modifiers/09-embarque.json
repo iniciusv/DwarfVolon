@@ -1,0 +1,20 @@
+{
+  "id": "embarque",
+  "name": "Embarque",
+  "icon": "🎒",
+  "order": 90,
+  "description": "Pontos para gastar em itens, animais e habilidades ao começar a fortaleza.",
+  "options": [
+    { "id": "padrao", "name": "Padrão", "isDefault": true, "description": "1504 pontos num mundo médio." },
+    {
+      "id": "generoso", "name": "Generoso", "titleTag": "RICO",
+      "description": "+50% de pontos.",
+      "operations": [ { "token": "EMBARK_POINTS", "multiply": [1.5] } ]
+    },
+    {
+      "id": "muito", "name": "Muito generoso", "titleTag": "MUITO RICO",
+      "description": "O dobro de pontos.",
+      "operations": [ { "token": "EMBARK_POINTS", "multiply": [2] } ]
+    }
+  ]
+}

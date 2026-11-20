@@ -1,0 +1,200 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="DwarfVolon.App"
+             RequestedThemeVariant="Default">
+    <!-- "Default" segue o tema do sistema (claro/escuro). Cor de destaque: âmbar #E0A030. -->
+
+    <Application.Styles>
+        <FluentTheme />
+
+        <!-- ===== Texto ===== -->
+        <Style Selector="TextBlock.h1">
+            <Setter Property="FontSize" Value="22" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style Selector="TextBlock.h2">
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style Selector="TextBlock.hint">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Opacity" Value="0.7" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style Selector="TextBlock.warn">
+            <Setter Property="Foreground" Value="#D08A00" />
+            <Setter Property="Opacity" Value="1" />
+        </Style>
+        <Style Selector="TextBlock.mono">
+            <Setter Property="FontFamily" Value="Cascadia Mono,Consolas,Menlo,monospace" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Opacity" Value="0.6" />
+        </Style>
+        <Style Selector="TextBlock.emoji">
+            <Setter Property="FontFamily" Value="Segoe UI Emoji,Apple Color Emoji,Noto Color Emoji" />
+        </Style>
+
+        <!-- ===== Abas ===== -->
+        <Style Selector="TabItem">
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="MinHeight" Value="40" />
+        </Style>
+        <Style Selector="TabControl.sub TabItem">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="MinHeight" Value="34" />
+        </Style>
+
+        <!-- ===== Menu lateral ===== -->
+        <Style Selector="Border.navRail">
+            <Setter Property="Background" Value="#0C808080" />
+            <Setter Property="BorderBrush" Value="#30808080" />
+            <Setter Property="BorderThickness" Value="0,0,1,0" />
+        </Style>
+        <Style Selector="ListBox.nav">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="10,0" />
+        </Style>
+        <Style Selector="ListBox.nav ListBoxItem">
+            <Setter Property="Padding" Value="10,9" />
+            <Setter Property="Margin" Value="0,1" />
+            <Setter Property="CornerRadius" Value="6" />
+        </Style>
+        <Style Selector="ListBox.nav ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#33E0A030" />
+        </Style>
+        <Style Selector="ListBox.nav ListBoxItem:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#44E0A030" />
+        </Style>
+
+        <Style Selector="Border.badge">
+            <Setter Property="Background" Value="#30808080" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="7,1" />
+        </Style>
+        <Style Selector="Border.badge TextBlock">
+            <Setter Property="FontSize" Value="10" />
+        </Style>
+        <Style Selector="Border.badge.accent">
+            <Setter Property="Background" Value="#E0A030" />
+        </Style>
+        <Style Selector="Border.badge.accent TextBlock">
+            <Setter Property="Foreground" Value="#1A1A1A" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+
+        <!-- ===== Gerador de mundo ===== -->
+        <Style Selector="Border.modCard">
+            <Setter Property="Width" Value="345" />
+            <Setter Property="Margin" Value="0,0,16,16" />
+            <Setter Property="Padding" Value="16,14" />
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="#40808080" />
+            <Setter Property="Background" Value="#08808080" />
+        </Style>
+        <Style Selector="Border.modCard.modified">
+            <Setter Property="BorderBrush" Value="#E0A030" />
+            <Setter Property="Background" Value="#10E0A030" />
+        </Style>
+
+        <Style Selector="ListBox.chips">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+        </Style>
+        <Style Selector="ListBox.chips ListBoxItem">
+            <Setter Property="Padding" Value="12,5" />
+            <Setter Property="Margin" Value="0,0,6,6" />
+            <Setter Property="CornerRadius" Value="14" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="#50808080" />
+            <Setter Property="MinHeight" Value="0" />
+        </Style>
+        <Style Selector="ListBox.chips ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#E0A030" />
+            <Setter Property="BorderBrush" Value="#E0A030" />
+            <Setter Property="Foreground" Value="#1A1A1A" />
+        </Style>
+        <Style Selector="ListBox.chips ListBoxItem:selected TextBlock">
+            <Setter Property="Foreground" Value="#1A1A1A" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style Selector="Button.pill.active TextBlock">
+            <Setter Property="Foreground" Value="#1A1A1A" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style Selector="ListBox.chips ListBoxItem:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#F0B848" />
+            <Setter Property="Foreground" Value="#1A1A1A" />
+        </Style>
+
+        <Style Selector="Button.pill">
+            <Setter Property="CornerRadius" Value="14" />
+            <Setter Property="Padding" Value="14,6" />
+        </Style>
+        <Style Selector="Button.pill.active /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#E0A030" />
+            <Setter Property="Foreground" Value="#1A1A1A" />
+        </Style>
+        <Style Selector="Button.pill.active:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#F0B848" />
+            <Setter Property="Foreground" Value="#1A1A1A" />
+        </Style>
+
+        <Style Selector="Border.riskBox">
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="Padding" Value="10,8" />
+            <Setter Property="BorderThickness" Value="3,0,0,0" />
+        </Style>
+        <Style Selector="Border.riskBox.low">
+            <Setter Property="BorderBrush" Value="#3FA34D" />
+            <Setter Property="Background" Value="#183FA34D" />
+        </Style>
+        <Style Selector="Border.riskBox.medium">
+            <Setter Property="BorderBrush" Value="#E0A030" />
+            <Setter Property="Background" Value="#1CE0A030" />
+        </Style>
+        <Style Selector="Border.riskBox.high">
+            <Setter Property="BorderBrush" Value="#E04040" />
+            <Setter Property="Background" Value="#1CE04040" />
+        </Style>
+
+        <Style Selector="Border.summaryPanel">
+            <Setter Property="Background" Value="#08808080" />
+            <Setter Property="BorderBrush" Value="#30808080" />
+            <Setter Property="BorderThickness" Value="1,0,0,0" />
+        </Style>
+
+        <Style Selector="Border.tokenRow">
+            <Setter Property="Padding" Value="10,6" />
+            <Setter Property="Margin" Value="0,1" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="BorderThickness" Value="3,0,0,0" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+        </Style>
+        <Style Selector="Border.tokenRow.changed">
+            <Setter Property="BorderBrush" Value="#E0A030" />
+            <Setter Property="Background" Value="#14E0A030" />
+        </Style>
+        <Style Selector="TextBox.error">
+            <Setter Property="BorderBrush" Value="#E04040" />
+        </Style>
+        <Style Selector="TextBox.argChanged">
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+
+        <!-- ===== Gerais ===== -->
+        <Style Selector="Border.card">
+            <Setter Property="BorderBrush" Value="#40808080" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="16" />
+        </Style>
+        <Style Selector="Border.statusBar">
+            <Setter Property="BorderBrush" Value="#30808080" />
+            <Setter Property="BorderThickness" Value="0,1,0,0" />
+            <Setter Property="Padding" Value="12,6" />
+        </Style>
+    </Application.Styles>
+</Application>

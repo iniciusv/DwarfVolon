@@ -1,0 +1,51 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:DwarfVolon.ViewModels"
+             x:Class="DwarfVolon.Views.SettingsView"
+             x:DataType="vm:SettingsViewModel">
+    <ScrollViewer>
+        <StackPanel Margin="24" Spacing="16" MaxWidth="960" HorizontalAlignment="Left">
+            <TextBlock Classes="h1" Text="Dwarf Fortress" />
+            <TextBlock Classes="hint"
+                       Text="Pasta de instalação do jogo (onde fica o Dwarf Fortress.exe). A partir dela o DwarfVolon descobre onde ficam o prefs/world_gen.txt e os saves, inclusive se o jogo está em modo portátil." />
+
+            <Grid ColumnDefinitions="*,Auto,Auto">
+                <TextBox Grid.Column="0" Text="{Binding DirectoryText}" PlaceholderText="Ex.: C:\Program Files (x86)\Steam\steamapps\common\Dwarf Fortress" />
+                <Button Grid.Column="1" Margin="8,0,0,0" Content="Procurar..." Click="Browse_Click" />
+                <Button Grid.Column="2" Margin="8,0,0,0" Content="Detectar automaticamente" Command="{Binding DetectCommand}" />
+            </Grid>
+
+            <StackPanel Orientation="Horizontal" Spacing="12">
+                <Button Classes="accent" Content="Usar esta pasta" Command="{Binding ApplyCommand}" />
+                <TextBlock VerticalAlignment="Center" Text="{Binding StatusMessage}" TextWrapping="Wrap" />
+            </StackPanel>
+
+            <Border Classes="card">
+                <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+                    <Grid.Styles>
+                        <Style Selector="TextBlock">
+                            <Setter Property="Margin" Value="0,4" />
+                            <Setter Property="TextWrapping" Value="Wrap" />
+                        </Style>
+                    </Grid.Styles>
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Instalação" FontWeight="SemiBold" Margin="0,4,24,4" />
+                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ValidityText}" />
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Modo portátil" FontWeight="SemiBold" Margin="0,4,24,4" />
+                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding PortableText}" />
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Dados do usuário" FontWeight="SemiBold" Margin="0,4,24,4" />
+                    <SelectableTextBlock Grid.Row="2" Grid.Column="1" Margin="0,4" TextWrapping="Wrap" Text="{Binding UserDataText}" />
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="world_gen.txt" FontWeight="SemiBold" Margin="0,4,24,4" />
+                    <SelectableTextBlock Grid.Row="3" Grid.Column="1" Margin="0,4" TextWrapping="Wrap" Text="{Binding WorldGenText}" />
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="DFHack" FontWeight="SemiBold" Margin="0,4,24,4" />
+                    <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding DfHackText}" />
+                </Grid>
+            </Border>
+
+            <WrapPanel>
+                <Button Margin="0,0,8,8" Content="Abrir pasta do jogo" Command="{Binding OpenInstallFolderCommand}" />
+                <Button Margin="0,0,8,8" Content="Abrir pasta prefs" Command="{Binding OpenPrefsFolderCommand}" />
+                <Button Margin="0,0,8,8" Content="Abrir pasta do DwarfVolon (configurações e presets)" Command="{Binding OpenAppDataFolderCommand}" />
+            </WrapPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

@@ -1,0 +1,33 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".gitignore" />
+    <File Path="global.json" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/docs/">
+    <File Path="docs/01-visao-e-objetivos.md" />
+    <File Path="docs/02-arquitetura.md" />
+    <File Path="docs/03-roadmap.md" />
+    <File Path="docs/04-world-gen.md" />
+    <File Path="docs/05-integracao-dfhack.md" />
+    <File Path="docs/06-assistente-ia.md" />
+    <File Path="docs/07-markdown.md" />
+    <File Path="docs/08-embarque.md" />
+    <File Path="docs/decisoes.md" />
+    <File Path="docs/ideias.md" />
+    <File Path="docs/README.md" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/DwarfVolon.Core/DwarfVolon.Core.csproj" />
+    <Project Path="src/DwarfVolon.DFHack/DwarfVolon.DFHack.csproj" />
+    <Project Path="src/DwarfVolon/DwarfVolon.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/DwarfVolon.DfHackCli/DwarfVolon.DfHackCli.csproj" />
+    <Project Path="tools/DwarfVolon.WorldGenLab/DwarfVolon.WorldGenLab.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/DwarfVolon.Core.Tests/DwarfVolon.Core.Tests.csproj" />
+    <Project Path="tests/DwarfVolon.Tests/DwarfVolon.Tests.csproj" />
+  </Folder>
+</Solution>

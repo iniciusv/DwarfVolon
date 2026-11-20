@@ -1,0 +1,62 @@
+{
+  "id": "perigo",
+  "name": "Perigo",
+  "icon": "⚔️",
+  "order": 50,
+  "description": "Megabestas, titãs, maldições e áreas malignas.",
+  "options": [
+    {
+      "id": "tranquilo", "name": "Tranquilo", "titleTag": "TRANQUILO",
+      "description": "Bem menos megabestas, titãs, lobisomens, vampiros e áreas malignas, e ataques que demoram mais.",
+      "operations": [
+        { "token": "MEGABEAST_CAP", "multiply": [0.4] },
+        { "token": "SEMIMEGABEAST_CAP", "multiply": [0.4] },
+        { "token": "TITAN_NUMBER", "multiply": [0.4] },
+        { "token": "TITAN_ATTACK_TRIGGER", "multiply": [1.5, 1.5, 1.5] },
+        { "token": "WEREBEAST_NUMBER", "multiply": [0.3] },
+        { "token": "VAMPIRE_NUMBER", "multiply": [0.3] },
+        { "token": "NIGHT_TROLL_NUMBER", "multiply": [0.5] },
+        { "token": "BOGEYMAN_NUMBER", "multiply": [0.5] },
+        { "token": "EVIL_CLOUD_NUMBER", "multiply": [0.3] },
+        { "token": "EVIL_RAIN_NUMBER", "multiply": [0.3] },
+        { "token": "EVIL_SQ_COUNTS", "multiply": [0.3, 0.3, 0.3] }
+      ]
+    },
+    { "id": "padrao", "name": "Padrão", "isDefault": true, "description": "Ameaças no nível padrão do jogo." },
+    {
+      "id": "perigoso", "name": "Perigoso", "titleTag": "PERIGOSO",
+      "description": "O dobro de megabestas, titãs e áreas malignas, e selvageria alta 2x mais comum.",
+      "notes": ["Mais áreas selvagens vêm de mudar a distribuição de selvageria; ainda sobra área calma para as civilizações."],
+      "operations": [
+        { "token": "MEGABEAST_CAP", "multiply": [2] },
+        { "token": "SEMIMEGABEAST_CAP", "multiply": [2] },
+        { "token": "TITAN_NUMBER", "multiply": [2] },
+        { "token": "WEREBEAST_NUMBER", "multiply": [1.5] },
+        { "token": "VAMPIRE_NUMBER", "multiply": [1.5] },
+        { "token": "EVIL_CLOUD_NUMBER", "multiply": [2] },
+        { "token": "EVIL_RAIN_NUMBER", "multiply": [2] },
+        { "token": "EVIL_SQ_COUNTS", "multiply": [2, 2, 2] },
+        { "token": "SAVAGERY_FREQUENCY", "set": [null, 1, 1, 1, 1, 2] },
+        { "token": "SAVAGERY_RANGES", "multiply": [1, 0.8, 1] }
+      ]
+    },
+    {
+      "id": "brutal", "name": "Brutal", "titleTag": "BRUTAL",
+      "description": "3x as megabestas e titãs, 3x as áreas malignas, selvageria alta 3x mais comum e ataques mais cedo.",
+      "notes": ["Fortalezas muito difíceis. Selvageria 66+ impede civilizações; o nível mantém cerca de metade do mapa abaixo disso."],
+      "operations": [
+        { "token": "MEGABEAST_CAP", "multiply": [3] },
+        { "token": "SEMIMEGABEAST_CAP", "multiply": [3] },
+        { "token": "TITAN_NUMBER", "multiply": [3] },
+        { "token": "TITAN_ATTACK_TRIGGER", "multiply": [0.5, 0.5, 0.5] },
+        { "token": "WEREBEAST_NUMBER", "multiply": [2] },
+        { "token": "VAMPIRE_NUMBER", "multiply": [2] },
+        { "token": "EVIL_CLOUD_NUMBER", "multiply": [3] },
+        { "token": "EVIL_RAIN_NUMBER", "multiply": [3] },
+        { "token": "EVIL_SQ_COUNTS", "multiply": [3, 3, 3] },
+        { "token": "SAVAGERY_FREQUENCY", "set": [null, 1, 1, 1, 1, 3] },
+        { "token": "SAVAGERY_RANGES", "multiply": [1, 0.7, 1] }
+      ]
+    }
+  ]
+}

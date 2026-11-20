@@ -1,0 +1,25 @@
+{
+  "id": "historia",
+  "name": "História",
+  "icon": "📜",
+  "order": 80,
+  "description": "Quantos anos de história o jogo simula antes de você começar.",
+  "options": [
+    {
+      "id": "curta", "name": "Curta (125 anos)", "titleTag": "JOVEM",
+      "description": "Gera rápido; mais megabestas vivas e civilizações pequenas.",
+      "operations": [ { "token": "END_YEAR", "set": [125] } ]
+    },
+    {
+      "id": "media", "name": "Média (250 anos)", "titleTag": "250 ANOS",
+      "description": "Equilíbrio entre tempo de geração e profundidade das lendas.",
+      "operations": [ { "token": "END_YEAR", "set": [250] } ]
+    },
+    {
+      "id": "longa", "name": "Longa (550 anos)", "titleTag": "550 ANOS",
+      "description": "Mais lendas e artefatos; menos megabestas sobrevivem.",
+      "operations": [ { "token": "END_YEAR", "set": [550] } ]
+    },
+    { "id": "padrao", "name": "Padrão (1050 anos)", "isDefault": true, "description": "História muito longa, padrão da região média. A geração demora." }
+  ]
+}

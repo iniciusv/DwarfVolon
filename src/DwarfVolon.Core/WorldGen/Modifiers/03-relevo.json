@@ -1,0 +1,29 @@
+{
+  "id": "relevo",
+  "name": "Relevo",
+  "icon": "⛰️",
+  "order": 30,
+  "description": "Proporção entre planícies e montanhas. Muda a distribuição de elevação e ajusta os mínimos para continuarem cabendo.",
+  "options": [
+    {
+      "id": "plano", "name": "Mais planícies", "titleTag": "PLANO",
+      "description": "Elevações médias 2x mais comuns; menos picos e montanhas exigidos.",
+      "operations": [
+        { "token": "ELEVATION_FREQUENCY", "set": [null, 1, 2, 2, 1, 1] },
+        { "token": "PEAK_NUMBER_MIN", "multiply": [0.5] },
+        { "token": "REGION_COUNTS", "key": "MOUNTAINS", "multiply": [0.5, 1, 1] },
+        { "token": "ELEVATION_RANGES", "multiply": [1, 1, 0.6] }
+      ]
+    },
+    { "id": "padrao", "name": "Padrão", "isDefault": true, "description": "Distribuição de relevo padrão do jogo." },
+    {
+      "id": "montanhoso", "name": "Montanhoso", "titleTag": "MONTANHOSO",
+      "description": "Elevações altas mais comuns, 50% mais picos e 25% mais área de montanha exigida.",
+      "operations": [
+        { "token": "ELEVATION_FREQUENCY", "set": [null, 2, 2, 2, 3, 4] },
+        { "token": "PEAK_NUMBER_MIN", "multiply": [1.5] },
+        { "token": "REGION_COUNTS", "key": "MOUNTAINS", "multiply": [1.25, 1, 1] }
+      ]
+    }
+  ]
+}

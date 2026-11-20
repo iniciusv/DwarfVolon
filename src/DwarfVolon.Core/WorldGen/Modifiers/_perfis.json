@@ -1,0 +1,32 @@
+[
+  {
+    "id": "padrao", "name": "Tudo padrão",
+    "description": "Volta todas as categorias para o padrão do jogo.",
+    "selections": {}
+  },
+  {
+    "id": "rios-vulcoes", "name": "Rios e vulcões",
+    "description": "Mais rios e mais vulcões, o resto padrão.",
+    "selections": { "rios": "mais", "vulcanismo": "mais" }
+  },
+  {
+    "id": "magma-facil", "name": "Magma fácil",
+    "description": "Mais vulcões, 2 camadas de caverna (mar de magma mais raso) e minérios abundantes: indústria a magma cedo.",
+    "selections": { "vulcanismo": "mais", "camadas": "duas", "minerios": "abundantes" }
+  },
+  {
+    "id": "fortaleza-segura", "name": "Fortaleza segura",
+    "description": "Pouco perigo, cavernas fechadas e poucas camadas: fácil de murar.",
+    "selections": { "perigo": "tranquilo", "cavernas": "fechadas", "camadas": "duas", "embarque": "generoso" }
+  },
+  {
+    "id": "iniciante", "name": "Iniciante",
+    "description": "Tranquilo, com recursos fartos, rios e história mais curta (gera rápido).",
+    "selections": { "perigo": "tranquilo", "minerios": "abundantes", "rios": "mais", "embarque": "generoso", "historia": "media" }
+  },
+  {
+    "id": "desafio", "name": "Desafio",
+    "description": "Brutal, pouco minério, poucos rios e cavernas abertas.",
+    "selections": { "perigo": "brutal", "minerios": "escassos", "rios": "poucos", "cavernas": "abertas" }
+  }
+]
