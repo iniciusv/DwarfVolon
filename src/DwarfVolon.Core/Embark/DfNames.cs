@@ -108,6 +108,18 @@ public static class DfNames
         ["GELD"] = "Castração",
         ["PAPERMAKING"] = "Fazer papel",
         ["BOOKBINDING"] = "Encadernação",
+        ["SPEAKING"] = "Oratória",
+        ["POETRY"] = "Poesia",
+        ["PROSE"] = "Prosa",
+        ["WRITING"] = "Escrita",
+        ["READING"] = "Leitura",
+        ["DANCE"] = "Dança",
+        ["MAKE_MUSIC"] = "Música",
+        ["SING_MUSIC"] = "Canto",
+        ["PLAY_KEYBOARD_INSTRUMENT"] = "Instrumento de teclas",
+        ["PLAY_STRINGED_INSTRUMENT"] = "Instrumento de cordas",
+        ["PLAY_WIND_INSTRUMENT"] = "Instrumento de sopro",
+        ["PLAY_PERCUSSION_INSTRUMENT"] = "Percussão",
         ["CUT_STONE"] = "Cortar pedra",
         ["CARVE_STONE"] = "Esculpir pedra",
     };
@@ -134,6 +146,154 @@ public static class DfNames
         ["EMPATHY"] = "Empatia",
         ["SOCIAL_AWARENESS"] = "Percepção social",
     };
+
+    private static readonly Dictionary<string, string> FacetNames = new()
+    {
+        ["LOVE_PROPENSITY"] = "Propensão ao amor",
+        ["HATE_PROPENSITY"] = "Propensão ao ódio",
+        ["ENVY_PROPENSITY"] = "Inveja",
+        ["CHEER_PROPENSITY"] = "Alegria",
+        ["DEPRESSION_PROPENSITY"] = "Tendência à depressão",
+        ["ANGER_PROPENSITY"] = "Irritabilidade",
+        ["ANXIETY_PROPENSITY"] = "Ansiedade",
+        ["LUST_PROPENSITY"] = "Luxúria",
+        ["STRESS_VULNERABILITY"] = "Vulnerabilidade ao estresse",
+        ["GREED"] = "Ganância",
+        ["IMMODERATION"] = "Imoderação",
+        ["VIOLENT"] = "Violência",
+        ["PERSEVERANCE"] = "Perseverança",
+        ["WASTEFULNESS"] = "Desperdício",
+        ["DISCORD"] = "Discórdia",
+        ["FRIENDLINESS"] = "Simpatia",
+        ["POLITENESS"] = "Educação",
+        ["DISDAIN_ADVICE"] = "Desdém por conselhos",
+        ["BRAVERY"] = "Coragem",
+        ["CONFIDENCE"] = "Autoconfiança",
+        ["VANITY"] = "Vaidade",
+        ["AMBITION"] = "Ambição",
+        ["GRATITUDE"] = "Gratidão",
+        ["IMMODESTY"] = "Imodéstia",
+        ["HUMOR"] = "Humor",
+        ["VENGEFUL"] = "Espírito vingativo",
+        ["PRIDE"] = "Orgulho",
+        ["CRUELTY"] = "Crueldade",
+        ["SINGLEMINDED"] = "Obstinação",
+        ["HOPEFUL"] = "Esperança",
+        ["CURIOUS"] = "Curiosidade",
+        ["BASHFUL"] = "Timidez",
+        ["PRIVACY"] = "Reserva",
+        ["PERFECTIONIST"] = "Perfeccionismo",
+        ["CLOSEMINDED"] = "Teimosia",
+        ["TOLERANT"] = "Tolerância",
+        ["EMOTIONALLY_OBSESSIVE"] = "Apego emocional",
+        ["SWAYED_BY_EMOTIONS"] = "Levado pelas emoções",
+        ["ALTRUISM"] = "Altruísmo",
+        ["DUTIFULNESS"] = "Senso de dever",
+        ["THOUGHTLESSNESS"] = "Impulsividade",
+        ["ORDERLINESS"] = "Organização",
+        ["TRUST"] = "Confiança nos outros",
+        ["GREGARIOUSNESS"] = "Sociabilidade",
+        ["ASSERTIVENESS"] = "Assertividade",
+        ["ACTIVITY_LEVEL"] = "Energia",
+        ["EXCITEMENT_SEEKING"] = "Busca por emoção",
+        ["IMAGINATION"] = "Imaginação",
+        ["ABSTRACT_INCLINED"] = "Pensamento abstrato",
+        ["ART_INCLINED"] = "Gosto por arte",
+    };
+
+    private static readonly Dictionary<string, string> BeliefNames = new()
+    {
+        ["LAW"] = "Lei",
+        ["LOYALTY"] = "Lealdade",
+        ["FAMILY"] = "Família",
+        ["FRIENDSHIP"] = "Amizade",
+        ["POWER"] = "Poder",
+        ["TRUTH"] = "Verdade",
+        ["CUNNING"] = "Astúcia",
+        ["ELOQUENCE"] = "Eloquência",
+        ["FAIRNESS"] = "Justiça",
+        ["DECORUM"] = "Decoro",
+        ["TRADITION"] = "Tradição",
+        ["ARTWORK"] = "Arte",
+        ["COOPERATION"] = "Cooperação",
+        ["INDEPENDENCE"] = "Independência",
+        ["STOICISM"] = "Estoicismo",
+        ["INTROSPECTION"] = "Introspecção",
+        ["SELF_CONTROL"] = "Autocontrole",
+        ["TRANQUILITY"] = "Tranquilidade",
+        ["HARMONY"] = "Harmonia",
+        ["MERRIMENT"] = "Festa",
+        ["CRAFTSMANSHIP"] = "Artesanato",
+        ["MARTIAL_PROWESS"] = "Habilidade marcial",
+        ["SKILL"] = "Maestria",
+        ["HARD_WORK"] = "Trabalho duro",
+        ["SACRIFICE"] = "Sacrifício",
+        ["COMPETITION"] = "Competição",
+        ["PERSEVERANCE"] = "Perseverança",
+        ["LEISURE_TIME"] = "Lazer",
+        ["COMMERCE"] = "Comércio",
+        ["ROMANCE"] = "Romance",
+        ["NATURE"] = "Natureza",
+        ["PEACE"] = "Paz",
+        ["KNOWLEDGE"] = "Conhecimento",
+    };
+
+    private static readonly Dictionary<string, string> DreamNames = new()
+    {
+        ["STAY_ALIVE"] = "Sobreviver",
+        ["MAINTAIN_ENTITY_STATUS"] = "Manter a posição",
+        ["START_A_FAMILY"] = "Formar uma família",
+        ["RULE_THE_WORLD"] = "Governar o mundo",
+        ["CREATE_A_GREAT_WORK_OF_ART"] = "Criar uma grande obra de arte",
+        ["CRAFT_A_MASTERWORK"] = "Fazer uma obra-prima",
+        ["BRING_PEACE_TO_THE_WORLD"] = "Trazer paz ao mundo",
+        ["BECOME_A_LEGENDARY_WARRIOR"] = "Ser um guerreiro lendário",
+        ["MASTER_A_SKILL"] = "Dominar uma habilidade",
+        ["FALL_IN_LOVE"] = "Se apaixonar",
+        ["SEE_THE_GREAT_NATURAL_SITES"] = "Ver as grandes maravilhas naturais",
+        ["IMMORTALITY"] = "Imortalidade",
+        ["MAKE_A_GREAT_DISCOVERY"] = "Fazer uma grande descoberta",
+        ["ATTAINING_RANK_IN_SOCIETY"] = "Subir na sociedade",
+        ["BATHING_WORLD_IN_CHAOS"] = "Mergulhar o mundo no caos",
+    };
+
+    private static readonly Dictionary<string, string> PreferenceKindNames = new()
+    {
+        ["LikeMaterial"] = "Materiais",
+        ["LikeFood"] = "Comida e bebida",
+        ["LikeCreature"] = "Criaturas",
+        ["HateCreature"] = "Odeia",
+        ["LikeItem"] = "Itens",
+        ["LikePlant"] = "Plantas",
+        ["LikeTree"] = "Árvores",
+        ["LikeColor"] = "Cores",
+        ["LikeShape"] = "Formas",
+        ["LikePoeticForm"] = "Poesia",
+        ["LikeMusicalForm"] = "Música",
+        ["LikeDanceForm"] = "Dança",
+    };
+
+    /// <summary>Facetas de personalidade, na ordem do jogo.</summary>
+    public static IReadOnlyList<string> Facets => [.. FacetNames.Keys];
+
+    public static string Facet(string id) => FacetNames.GetValueOrDefault(id, Humanize(id));
+
+    public static string Belief(string id) => BeliefNames.GetValueOrDefault(id, Humanize(id));
+
+    public static string Dream(string id) => DreamNames.GetValueOrDefault(id, Humanize(id));
+
+    /// <summary>Grupo de um gosto (ex.: LikeMaterial → Materiais).</summary>
+    public static string PreferenceKind(string kind) => PreferenceKindNames.GetValueOrDefault(kind, Humanize(kind));
+
+    /// <summary>Ordem de exibição dos grupos de gostos (ódios por último).</summary>
+    public static int PreferenceKindOrder(string kind)
+    {
+        var index = PreferenceKindNames.Keys.ToList().IndexOf(kind);
+        return kind == "HateCreature" ? 1000 : index < 0 ? 999 : index;
+    }
+
+    private static string Humanize(string id) =>
+        id.Length == 0 ? id : char.ToUpperInvariant(id[0]) + id[1..].ToLowerInvariant().Replace('_', ' ');
 
     /// <summary>Atributos físicos, na ordem do jogo.</summary>
     public static IReadOnlyList<string> PhysicalAttributes { get; } =

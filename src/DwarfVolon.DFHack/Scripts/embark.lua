@@ -27,15 +27,68 @@ local function enum_list(enum_type, values)
     return out
 end
 
+-- Nome (em inglês, como o jogo mostra) do objeto de um gosto. nil se não der para resolver.
+local function material_name(mattype, matindex)
+    local info = dfhack.matinfo.decode(mattype, matindex)
+    return info and info:toString() or nil
+end
+
+local function form_name(kind, id)
+    local form = df[kind] and df[kind].find(id)
+    return form and dfhack.translation.translateName(form.name, true) or nil
+end
+
+local pref_resolvers = {
+    LikeMaterial = function(p) return material_name(p.mattype, p.matindex) end,
+    LikeFood = function(p) return material_name(p.mattype, p.matindex) end,
+    LikeCreature = function(p) local c = df.creature_raw.find(p.creature_id) return c and c.name[1] end,
+    HateCreature = function(p) local c = df.creature_raw.find(p.creature_id) return c and c.name[1] end,
+    LikeItem = function(p)
+        if p.item_subtype >= 0 then
+            local def = dfhack.items.getSubtypeDef(p.item_type, p.item_subtype)
+            if def then return def.name_plural or def.name end
+        end
+        local id = df.item_type[p.item_type]
+        return id and id:lower():gsub('_', ' ') or nil
+    end,
+    LikePlant = function(p) local pl = df.plant_raw.find(p.plant_id) return pl and pl.name_plural end,
+    LikeTree = function(p) local pl = df.plant_raw.find(p.plant_id) return pl and pl.name_plural end,
+    LikeColor = function(p) local c = df.global.world.raws.descriptors.colors[p.color_id] return c and c.name end,
+    LikeShape = function(p) local sh = df.global.world.raws.descriptors.shapes[p.shape_id] return sh and sh.name_plural end,
+    LikePoeticForm = function(p) return form_name('poetic_form', p.poetic_form_id) end,
+    LikeMusicalForm = function(p) return form_name('musical_form', p.musical_form_id) end,
+    LikeDanceForm = function(p) return form_name('dance_form', p.dance_form_id) end,
+}
+
+local function collect_preferences(soul)
+    local out = {}
+    for _, p in ipairs(soul.preferences) do
+        local kind = df.unitpref_type[p.type] or tostring(p.type)
+        local resolver = pref_resolvers[kind]
+        local ok, text = pcall(function() return resolver and resolver(p) end)
+        table.insert(out, { kind = kind, text = utf(ok and text or '') })
+    end
+    return out
+end
+
 local function collect_dwarf(index, info, unit)
-    local native, english = name_of(info.name)
+    -- No embarque de fortaleza, nome, idade, alma e habilidades de fundo ficam na unidade
+    -- (s_unit); dwarf_info só tem o que é escolhido na tela (skilllevel, skill_picks_left).
+    local name = (unit and unit.name.has_name) and unit.name or info.name
+    local native, english = name_of(name)
     local d = {
         index = index,
         name = native,
         name_english = english,
+        nickname = utf(name.nickname),
         picks_left = info.skill_picks_left,
-        birth_year = info.birth_year,
+        birth_year = unit and unit.birth_year or info.birth_year,
+        age = unit and math.floor(dfhack.units.getAge(unit)) or nil,
         skills = {},
+        background_skills = {},
+        preferences = {},
+        beliefs = {},
+        dreams = {},
         physical = {},
         mental = {},
         traits = {},
@@ -52,6 +105,7 @@ local function collect_dwarf(index, info, unit)
 
     if unit then
         d.unit_id = unit.id
+        d.hist_figure_id = unit.hist_figure_id
         d.sex = unit.sex
         d.profession = df.profession[unit.profession] or ''
         for attr = 0, df.physical_attribute_type._last_item do
@@ -66,10 +120,32 @@ local function collect_dwarf(index, info, unit)
 
     -- Personalidade: valores 0–100 por faceta (50 = neutro).
     local soul = unit and unit.status.current_soul
+
+    -- Habilidades que o anão já traz (ex.: música, poesia); não saem dos pontos de habilidade.
+    if soul then
+        for _, sk in ipairs(soul.skills) do
+            if sk.rating > 0 then
+                table.insert(d.background_skills, { id = df.job_skill[sk.id], level = sk.rating })
+            end
+        end
+        table.sort(d.background_skills, function(a, b) return a.level > b.level or (a.level == b.level and a.id < b.id) end)
+    end
+
     local pers = soul and soul.personality or info.pers
     if pers then
         for facet = 0, df.personality_facet_type._last_item do
             d.traits[df.personality_facet_type[facet]] = pers.traits[facet]
+        end
+    end
+
+    if soul then
+        d.preferences = collect_preferences(soul)
+        -- Crenças pessoais (as que diferem da cultura): força de -50 a 50.
+        for _, v in ipairs(soul.personality.values) do
+            table.insert(d.beliefs, { id = df.value_type[v.type] or tostring(v.type), strength = v.strength })
+        end
+        for _, dream in ipairs(soul.personality.dreams) do
+            table.insert(d.dreams, df.goal_type[dream.type] or tostring(dream.type))
         end
     end
 
@@ -89,6 +165,9 @@ local function collect(scr)
         points_remaining = scr.points_remaining,
         embark_points = df.global.world.worldgen.worldgen_parms.embark_points,
         cur_year = df.global.cur_year,
+        -- Pasta do mundo (ex.: region2): chave para guardar as decisões do embarque.
+        save_dir = df.global.world.cur_savegame.save_dir,
+        world = utf(dfhack.translation.translateName(df.global.world.world_data.name, true)),
         skill_tabs = {},
         dwarves = {},
     }
@@ -121,6 +200,24 @@ local function collect(scr)
                 local r = {}
                 for k = 0, 6 do r[k + 1] = caste.attributes.ment_att_range[attr][k] end
                 result.ranges.mental[df.mental_attribute_type[attr]] = r
+            end
+        end
+    end
+
+    -- Ficha de unidade aberta no jogo: o DF só gera o texto de descrição com ela aberta.
+    -- O app decide pelo sub_tab se o texto é da aba de personalidade e guarda por anão.
+    local vs = df.global.game.main_interface.view_sheets
+    if vs.open and #vs.personality_raw_str > 0 then
+        for _, unit in ipairs(scr.s_unit) do
+            if unit.id == vs.active_id then
+                local blocks = {}
+                for _, str in ipairs(vs.personality_raw_str) do table.insert(blocks, utf(str.value)) end
+                result.sheet = {
+                    unit_id = vs.active_id,
+                    sub_tab = vs.active_sub_tab,
+                    personality_tab = vs.personality_active_tab,
+                    blocks = blocks,
+                }
             end
         end
     end

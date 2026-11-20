@@ -15,14 +15,19 @@ public sealed class EmbarkTests
         "\"cur_year\":250,\"skill_tabs\":{\"CRUCIAL\":[\"MINING\"],\"OTHER\":[]}," +
         "\"skill_captions\":{\"MINING\":\"Mining\",\"WAX_WORKING\":\"Wax Working\"}," +
         "\"ranges\":{\"physical\":{\"STRENGTH\":[450,950,1150,1250,1350,1550,2250]},\"mental\":[]}," +
+        "\"sheet\":{\"unit_id\":100,\"sub_tab\":10,\"personality_tab\":0,\"blocks\":[\"[C:2:0:0]She is strong.\",\"\"]}," +
         "\"dwarves\":[" + string.Join(',', Enumerable.Range(0, dwarves).Select(Dwarf)) + "]}\n";
 
     private static string Dwarf(int i) =>
-        $"{{\"index\":{i},\"name\":\"Urist {i}\",\"name_english\":\"Urist {i}\",\"sex\":{i % 2},\"birth_year\":{200 + i}," +
+        $"{{\"index\":{i},\"unit_id\":{100 + i},\"name\":\"Urist {i}\",\"name_english\":\"Urist {i}\",\"sex\":{i % 2},\"birth_year\":{200 + i}," +
         $"\"picks_left\":{(i == 0 ? 8 : 10)},\"profession\":\"STANDARD\"," +
         $"\"skills\":{(i == 0 ? "[{\"id\":\"MINING\",\"level\":2}]" : "[]")}," +
         $"\"physical\":{{\"STRENGTH\":{1000 + 200 * i},\"AGILITY\":{900 - 50 * i}}}," +
         $"\"mental\":{{\"ANALYTICAL_ABILITY\":{1500 - 200 * i}}}," +
+        "\"background_skills\":[{\"id\":\"DANCE\",\"level\":3}]," +
+        "\"preferences\":[{\"kind\":\"LikeMaterial\",\"text\":\"steel\"},{\"kind\":\"HateCreature\",\"text\":\"hamsters\"},{\"kind\":\"LikeItem\",\"text\":\"\"}]," +
+        "\"beliefs\":[{\"id\":\"TRANQUILITY\",\"strength\":49},{\"id\":\"SELF_CONTROL\",\"strength\":-6}]," +
+        "\"dreams\":[\"CREATE_A_GREAT_WORK_OF_ART\"]," +
         $"\"traits\":{(i == 1 ? "{\"STRESS_VULNERABILITY\":90,\"BRAVERY\":10}" : "[]")}}}";
 
     [Fact]
@@ -45,6 +50,17 @@ public sealed class EmbarkTests
         Assert.Equal(1500, first.Attribute("ANALYTICAL_ABILITY"));
         Assert.Empty(first.Traits);
         Assert.Equal(50, s.AgeOf(first));
+
+        Assert.Equal(100, first.UnitId);
+        Assert.Equal(3, first.SkillLevel("DANCE")); // habilidade que já traz conta no nível
+        Assert.Equal(2, first.SpentLevels);         // mas não gasta pontos
+        Assert.Equal(new EmbarkPreference("HateCreature", "hamsters"), first.Preferences[1]);
+        Assert.Equal(new EmbarkBelief("TRANQUILITY", 49), first.Beliefs[0]);
+        Assert.Equal(["CREATE_A_GREAT_WORK_OF_ART"], first.Dreams);
+
+        Assert.NotNull(s.Sheet);
+        Assert.True(s.Sheet.IsPersonality);
+        Assert.Equal(100, s.Sheet.UnitId);
     }
 
     [Fact]
@@ -186,19 +202,35 @@ public sealed class EmbarkTests
     }
 
     [Fact]
-    public void Markdown_has_suggestion_and_parseable_tables()
+    public void Markdown_has_data_and_parseable_tables_but_no_automatic_decisions()
     {
         var analysis = EmbarkAnalyzer.Analyze(EmbarkJson.Parse(SampleJson()));
         var md = EmbarkMarkdown.Build(analysis);
 
-        Assert.Contains("## Sugestão de funções", md);
+        Assert.DoesNotContain("Sugestão de funções", md); // funções só quando alguém decide
+        Assert.DoesNotContain("Decisões até agora", md);
+        Assert.Contains("## Nota por função", md);
         Assert.Contains("**1400** restantes de 2256", md);
         Assert.Contains("estressa fácil, medroso", md);
         Assert.Contains("Mineração 2", md);
+        Assert.DoesNotContain("Anão 1", md); // usa os nomes
+        Assert.Contains("hamsters", md);
+        Assert.Contains("Tranquilidade +49", md);
+        Assert.Contains("Criar uma grande obra de arte", md);
 
         var tables = MarkdownParser.Parse(md).OfType<MdTable>().ToList();
         Assert.True(tables.Count >= 5);
         Assert.All(tables, t => Assert.All(t.Rows, r => Assert.Equal(t.Headers.Count, r.Count)));
+    }
+
+    [Fact]
+    public void Markdown_for_ai_leaves_out_game_descriptions()
+    {
+        var snapshot = EmbarkJson.Parse(SampleJson()); // tem uma ficha aberta com texto
+        var md = EmbarkMarkdown.Build(EmbarkAnalyzer.Analyze(snapshot));
+
+        Assert.DoesNotContain("She is strong", md);
+        Assert.DoesNotContain("Descrições do jogo", md);
     }
 
     [Fact]

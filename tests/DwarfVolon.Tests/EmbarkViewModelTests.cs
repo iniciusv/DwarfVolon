@@ -26,7 +26,7 @@ public sealed class EmbarkViewModelTests
 
         Assert.False(vm.HasError);
         Assert.NotNull(vm.Analysis);
-        Assert.Contains("Sugestão de funções", vm.Markdown);
+        Assert.Contains("## Nota por função", vm.Markdown);
         Assert.Contains("Urist", vm.Markdown);
         Assert.StartsWith("DFHack teste · 2 anões", vm.StatusText);
     }

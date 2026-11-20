@@ -53,11 +53,17 @@ Detalhes em [05 – Integração com DFHack](05-integracao-dfhack.md).
 - ⏳ Tela **Anões**: tabela Markdown com colunas escolhidas (profissão, habilidades, humor/estresse, ferimentos, trabalho atual); filtros como "ociosos" e "com habilidade X sem usar"
 - ✅ Tela **Embarque**: anões, atributos, habilidades, nota por função e sugestão de funções e níveis ([08 – Embarque](08-embarque.md))
 - ⏳ Validar o Embarque na tela real do jogo (custo dos níveis x pontos de embarque)
-- ⏳ Embarque: preferências dos anões, itens e animais
+- ✅ Embarque: nomes, idades e habilidades que os anões já trazem (lidos da unidade)
+- ✅ Embarque: subabas **Anões** (ficha com gráficos, gostos, crenças, sonho e o texto original do jogo) e **Resumo (IA)** — [08](08-embarque.md#subabas)
+- ✅ Embarque: decisões na ficha (funções e plano de pontos), protocolo com a IA (copiar pedido, colar resposta) — [08](08-embarque.md#conversa-com-a-ia-protocolo)
+- ✅ Embarque: funções e pontos só por decisão (jogador, IA ou botão Sugerir); decisões salvas por mundo
+- ✅ Embarque: aplicar o plano de pontos no jogo, com confirmação e releitura — [08](08-embarque.md#aplicar-no-jogo)
+- ⏳ Embarque: conferir as regras de custo na tela do jogo depois da primeira aplicação
+- ⏳ Embarque: itens e animais
 
 ## Fase 3 – Ações na fortaleza ⏳
 
-- ⏳ Atribuir funções / *work details* (com confirmação)
+- ⏳ Atribuir funções / *work details* (com confirmação), começando pelas funções salvas no embarque (ex.: só os mineradores mineram)
 - ⏳ Ações em lote ("os 3 melhores mineradores em Mining")
 - ⏳ Histórico das ações feitas pelo app, com desfazer quando possível
 

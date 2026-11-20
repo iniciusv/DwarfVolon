@@ -57,7 +57,10 @@ DwarfVolon.Core/
     DfNames.cs                 nomes em pt-BR de habilidades, atributos e níveis
     EmbarkRoles.cs             funções da fortaleza (Resources/funcoes.json)
     EmbarkAnalyzer.cs          notas por função, distribuição e níveis sugeridos
+    EmbarkPlan.cs              decisões (funções + pontos + origem), regras e protocolo com a IA
+    EmbarkPlanStore.cs         decisões salvas por mundo; aplicação no jogo (itens e resultado)
     EmbarkMarkdown.cs          documento do embarque e schema da tabela de anões
+    DfRichText.cs              texto com cores das fichas do jogo; EmbarkSheetCache
   Markdown/
     MarkdownTable.cs           tabelas e schemas de colunas (MarkdownTableSchema<T>)
     MarkdownBuilder.cs         montagem de documentos
@@ -78,10 +81,14 @@ DwarfVolon/
     MainWindowViewModel.cs     itens do menu; MarkdownPageViewModel
     WorldGenEditorViewModel.cs gerador de mundo (Simples + Avançado + salvar)
     EmbarkViewModel.cs         embarque (lê o jogo pelo DFHack, atualização automática)
+    DwarfSheetViewModel.cs     ficha de um anão do embarque (linhas de gráfico prontas)
+    PlanEditorViewModel.cs     decisões de um anão (funções, pontos, aplicar no jogo)
     ModifierViewModels.cs      cards de categoria, níveis, perfis
     TokenRowViewModel.cs       linhas do editor avançado
     SettingsViewModel.cs
   Controls/MarkdownView.cs     renderizador de Markdown
+  Controls/MeterBar.cs         barra de magnitude ou divergente (gráficos das fichas)
+  Controls/DfRichTextView.cs   texto do jogo com as cores do DF
   Services/                    ShellHelper (abrir pastas), ClipboardHelper
 ```
 
@@ -101,6 +108,7 @@ Para adicionar uma página: criar o view-model, a view, um `DataTemplate` em `Ma
 | O quê | Onde |
 |---|---|
 | Configurações do app | `%APPDATA%\DwarfVolon\settings.json` |
+| Decisões do embarque (por mundo) | `%APPDATA%\DwarfVolon\embarques\<pasta do mundo>.json` |
 | Modificadores do usuário | `%APPDATA%\DwarfVolon\modificadores\*.json` |
 | world_gen.txt do jogo | `<dados do usuário DF>\prefs\world_gen.txt` (ver [world gen](04-world-gen.md#onde-fica-o-arquivo)) |
 | Backups do world_gen | `<dados do usuário DF>\prefs\dwarfvolon-backups\` |

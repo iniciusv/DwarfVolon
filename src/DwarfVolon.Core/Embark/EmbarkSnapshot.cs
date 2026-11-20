@@ -16,32 +16,77 @@ public enum EmbarkScreenState
 /// <summary>Uma habilidade escolhida para o anão no embarque (nível 1 = Novato ... 5 = Proficiente).</summary>
 public sealed record EmbarkSkill(string Id, int Level);
 
+/// <summary>Um gosto (ou ódio) do anão. <see cref="Kind"/> é o tipo do jogo (ex.: LikeMaterial); <see cref="Text"/> vem em inglês, como no jogo.</summary>
+public sealed record EmbarkPreference(string Kind, string Text);
+
+/// <summary>Uma crença pessoal (valor) do anão. <see cref="Strength"/> vai de -50 a 50 (0 = indiferente).</summary>
+public sealed record EmbarkBelief(string Id, int Strength);
+
+/// <summary>
+/// Ficha de unidade aberta no jogo no momento da leitura. O DF só gera o texto de descrição
+/// (<c>view_sheets.personality_raw_str</c>) com a ficha aberta.
+/// </summary>
+public sealed record EmbarkOpenSheet(int UnitId, int SubTab, int PersonalityTab, IReadOnlyList<string> Blocks)
+{
+    /// <summary>Valor de <c>active_sub_tab</c> da aba Personalidade (conferido no DF 53.17).</summary>
+    public const int PersonalitySubTab = 10;
+
+    public bool IsPersonality => SubTab == PersonalitySubTab && Blocks.Any(b => !string.IsNullOrWhiteSpace(b));
+}
+
 /// <summary>Um anão da tela de embarque, como o script <c>embark.lua</c> devolve.</summary>
 public sealed class EmbarkDwarf
 {
     public int Index { get; init; }
+
+    /// <summary>Id da unidade no jogo (liga o anão à ficha aberta).</summary>
+    public int? UnitId { get; init; }
+
+    /// <summary>Id da figura histórica: continua o mesmo depois do embarque.</summary>
+    public int? HistFigureId { get; init; }
+
     public string Name { get; init; } = "";
     public string NameEnglish { get; init; } = "";
+    public string Nickname { get; init; } = "";
 
     /// <summary>0 = fêmea, 1 = macho, outro = desconhecido.</summary>
     public int? Sex { get; init; }
 
     public int? BirthYear { get; init; }
+
+    /// <summary>Idade em anos, calculada pelo jogo.</summary>
+    public int? Age { get; init; }
     public string Profession { get; init; } = "";
 
     /// <summary>Pontos de habilidade que o anão ainda pode receber.</summary>
     public int PicksLeft { get; init; }
 
+    /// <summary>Habilidades escolhidas na tela de embarque (gastam os pontos de habilidade).</summary>
     public IReadOnlyList<EmbarkSkill> Skills { get; init; } = [];
+
+    /// <summary>Habilidades que o anão já traz (ex.: música, poesia); não gastam pontos.</summary>
+    public IReadOnlyList<EmbarkSkill> BackgroundSkills { get; init; } = [];
     public IReadOnlyDictionary<string, int> Physical { get; init; } = new Dictionary<string, int>();
     public IReadOnlyDictionary<string, int> Mental { get; init; } = new Dictionary<string, int>();
 
     /// <summary>Facetas de personalidade (0–100, 50 = neutro).</summary>
     public IReadOnlyDictionary<string, int> Traits { get; init; } = new Dictionary<string, int>();
 
+    /// <summary>Gostos e ódios, na ordem do jogo.</summary>
+    public IReadOnlyList<EmbarkPreference> Preferences { get; init; } = [];
+
+    /// <summary>Crenças que diferem da cultura do anão.</summary>
+    public IReadOnlyList<EmbarkBelief> Beliefs { get; init; } = [];
+
+    /// <summary>Sonhos (ids do jogo, ex.: CREATE_A_GREAT_WORK_OF_ART).</summary>
+    public IReadOnlyList<string> Dreams { get; init; } = [];
+
     public string DisplayName => string.IsNullOrWhiteSpace(Name) ? $"Anão {Index + 1}" : Name;
 
-    public int SkillLevel(string skillId) => Skills.FirstOrDefault(s => s.Id == skillId)?.Level ?? 0;
+    /// <summary>Nível na habilidade: o maior entre o escolhido no embarque e o que o anão já traz.</summary>
+    public int SkillLevel(string skillId) =>
+        Math.Max(Skills.FirstOrDefault(s => s.Id == skillId)?.Level ?? 0,
+                 BackgroundSkills.FirstOrDefault(s => s.Id == skillId)?.Level ?? 0);
 
     /// <summary>Total de níveis já escolhidos em todas as habilidades.</summary>
     public int SpentLevels => Skills.Sum(s => s.Level);
@@ -62,9 +107,18 @@ public sealed class EmbarkSnapshot
     /// <summary>Foco da tela, ex.: "setupdwarfgame/Dwarves".</summary>
     public string Focus { get; init; } = "";
 
+    /// <summary>Ficha aberta no jogo, se for de um dos anões do embarque.</summary>
+    public EmbarkOpenSheet? Sheet { get; init; }
+
     public int PointsRemaining { get; init; }
     public int EmbarkPoints { get; init; }
     public int CurrentYear { get; init; }
+
+    /// <summary>Pasta do mundo no save (ex.: region2). Chave para guardar as decisões do embarque.</summary>
+    public string SaveDir { get; init; } = "";
+
+    /// <summary>Nome do mundo (em inglês).</summary>
+    public string World { get; init; } = "";
     public IReadOnlyList<EmbarkDwarf> Dwarves { get; init; } = [];
 
     /// <summary>Habilidades por aba da tela (CRUCIAL, LABOR, COMBAT, OTHER).</summary>
@@ -77,7 +131,7 @@ public sealed class EmbarkSnapshot
     public IReadOnlyDictionary<string, string> SkillCaptions { get; init; } = new Dictionary<string, string>();
 
     public int? AgeOf(EmbarkDwarf dwarf) =>
-        dwarf.BirthYear is { } born && CurrentYear > 0 && born > 0 ? CurrentYear - born : null;
+        dwarf.Age ?? (dwarf.BirthYear is { } born && CurrentYear > 0 && born > 0 ? CurrentYear - born : null);
 }
 
 public sealed class EmbarkReadException(string message) : Exception(message);
@@ -125,28 +179,42 @@ public static class EmbarkJson
         {
             State = EmbarkScreenState.Embark,
             Focus = dto.Focus ?? "",
+            Sheet = dto.Sheet is { } sh ? new EmbarkOpenSheet(sh.UnitId, sh.SubTab, sh.PersonalityTab, sh.Blocks ?? []) : null,
             PointsRemaining = dto.PointsRemaining,
             EmbarkPoints = dto.EmbarkPoints,
             CurrentYear = dto.CurYear,
+            SaveDir = dto.SaveDir ?? "",
+            World = dto.World ?? "",
             SkillTabs = (dto.SkillTabs ?? []).ToDictionary(kv => kv.Key, kv => (IReadOnlyList<string>)kv.Value),
             AttributeRanges = ranges,
             SkillCaptions = dto.SkillCaptions ?? [],
             Dwarves = (dto.Dwarves ?? []).Select(d => new EmbarkDwarf
             {
                 Index = d.Index,
+                UnitId = d.UnitId,
+                HistFigureId = d.HistFigureId,
                 Name = d.Name ?? "",
                 NameEnglish = d.NameEnglish ?? "",
+                Nickname = d.Nickname ?? "",
+                Age = d.Age,
                 Sex = d.Sex,
                 BirthYear = d.BirthYear,
                 Profession = d.Profession ?? "",
                 PicksLeft = d.PicksLeft,
-                Skills = (d.Skills ?? []).Where(s => !string.IsNullOrEmpty(s.Id)).Select(s => new EmbarkSkill(s.Id!, s.Level)).ToList(),
+                Skills = ToSkills(d.Skills),
+                BackgroundSkills = ToSkills(d.BackgroundSkills),
+                Preferences = (d.Preferences ?? []).Select(p => new EmbarkPreference(p.Kind ?? "", p.Text ?? "")).ToList(),
+                Beliefs = (d.Beliefs ?? []).Where(b => !string.IsNullOrEmpty(b.Id)).Select(b => new EmbarkBelief(b.Id!, b.Strength)).ToList(),
+                Dreams = d.Dreams ?? [],
                 Physical = d.Physical ?? [],
                 Mental = d.Mental ?? [],
                 Traits = d.Traits ?? [],
             }).ToList(),
         };
     }
+
+    private static List<EmbarkSkill> ToSkills(List<SkillDto>? skills) =>
+        (skills ?? []).Where(s => !string.IsNullOrEmpty(s.Id)).Select(s => new EmbarkSkill(s.Id!, s.Level)).ToList();
 
     private static string Truncate(string text, int max) => text.Length <= max ? text : text[..max] + "…";
 
@@ -160,10 +228,33 @@ public static class EmbarkJson
         public int PointsRemaining { get; set; }
         public int EmbarkPoints { get; set; }
         public int CurYear { get; set; }
+        public string? SaveDir { get; set; }
+        public string? World { get; set; }
         public Dictionary<string, List<string>>? SkillTabs { get; set; }
         public Dictionary<string, string>? SkillCaptions { get; set; }
         public RangesDto? Ranges { get; set; }
         public List<DwarfDto>? Dwarves { get; set; }
+        public SheetDto? Sheet { get; set; }
+    }
+
+    private sealed class SheetDto
+    {
+        public int UnitId { get; set; }
+        public int SubTab { get; set; }
+        public int PersonalityTab { get; set; }
+        public List<string>? Blocks { get; set; }
+    }
+
+    private sealed class PreferenceDto
+    {
+        public string? Kind { get; set; }
+        public string? Text { get; set; }
+    }
+
+    private sealed class BeliefDto
+    {
+        public string? Id { get; set; }
+        public int Strength { get; set; }
     }
 
     private sealed class RangesDto
@@ -175,13 +266,21 @@ public static class EmbarkJson
     private sealed class DwarfDto
     {
         public int Index { get; set; }
+        public int? UnitId { get; set; }
+        public int? HistFigureId { get; set; }
         public string? Name { get; set; }
         public string? NameEnglish { get; set; }
+        public string? Nickname { get; set; }
+        public int? Age { get; set; }
         public int? Sex { get; set; }
         public int? BirthYear { get; set; }
         public string? Profession { get; set; }
         public int PicksLeft { get; set; }
         public List<SkillDto>? Skills { get; set; }
+        public List<SkillDto>? BackgroundSkills { get; set; }
+        public List<PreferenceDto>? Preferences { get; set; }
+        public List<BeliefDto>? Beliefs { get; set; }
+        public List<string>? Dreams { get; set; }
         public Dictionary<string, int>? Physical { get; set; }
         public Dictionary<string, int>? Mental { get; set; }
         public Dictionary<string, int>? Traits { get; set; }

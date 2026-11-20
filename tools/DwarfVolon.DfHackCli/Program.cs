@@ -7,12 +7,13 @@ using DwarfVolon.DFHack;
 //   dfhack-cli lua "<código>"
 //   dfhack-cli lua-file <arquivo.lua>
 //   dfhack-cli embark          (análise da tela de embarque em Markdown)
+//   dfhack-cli embark-pedido [instruções]  (pedido de distribuição de pontos para a IA)
 
 Console.OutputEncoding = System.Text.Encoding.UTF8;
 
 if (args.Length == 0)
 {
-    Console.WriteLine("uso: version | run <comando> [args...] | lua \"<código>\" | lua-file <arquivo> | embark");
+    Console.WriteLine("uso: version | run <comando> [args...] | lua \"<código>\" | lua-file <arquivo> | embark | embark-pedido [instruções]");
     return 2;
 }
 
@@ -29,6 +30,13 @@ switch (args[0])
         return Print(await client.RunLuaAsync(string.Join(' ', args.Skip(1))));
     case "lua-file":
         return Print(await client.RunLuaAsync(File.ReadAllText(args[1])));
+    case "embark-pedido":
+    {
+        await using var session = new DfHackSession(() => DfHackEndpoint.Default);
+        var snapshot = await new EmbarkReader(session).ReadAsync();
+        Console.WriteLine(EmbarkAiProtocol.BuildPointsRequest(EmbarkAnalyzer.Analyze(snapshot), string.Join(' ', args.Skip(1))));
+        return 0;
+    }
     case "embark":
     {
         await using var session = new DfHackSession(() => DfHackEndpoint.Default);

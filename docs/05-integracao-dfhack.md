@@ -50,6 +50,7 @@ DwarfVolon.DFHack         (C#)  sem dependências além do Core
   DfHackClient.cs               conexão, handshake, BindMethod, RunCommand, RunLuaAsync, versões
   DfHackSession.cs              DfHackEndpoint (porta) + sessão que reconecta sozinha
   EmbarkReader.cs               roda Scripts/embark.lua e devolve EmbarkSnapshot
+  EmbarkWriter.cs               manda um plano em JSON + Scripts/embark_apply.lua (escrita, valida antes)
   Scripts/*.lua                 scripts embutidos
 tools/DwarfVolon.DfHackCli      linha de comando: version | run | lua | lua-file | embark
 ```

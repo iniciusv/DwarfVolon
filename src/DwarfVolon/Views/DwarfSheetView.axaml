@@ -1,0 +1,270 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:DwarfVolon.ViewModels"
+             xmlns:controls="using:DwarfVolon.Controls"
+             xmlns:core="using:DwarfVolon.Core.Embark"
+             x:Class="DwarfVolon.Views.DwarfSheetView"
+             x:DataType="vm:DwarfSheetViewModel">
+    <UserControl.Styles>
+        <Style Selector="TextBlock.ai">
+            <Setter Property="Foreground" Value="#E0A030" />
+        </Style>
+        <Style Selector="TextBlock.strong">
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style Selector="TextBlock.section">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Margin" Value="0,0,0,2" />
+        </Style>
+        <Style Selector="Border.card.sheet">
+            <Setter Property="Width" Value="420" />
+            <Setter Property="Margin" Value="0,0,16,16" />
+            <Setter Property="VerticalAlignment" Value="Top" />
+        </Style>
+    </UserControl.Styles>
+
+    <UserControl.Resources>
+        <!-- Linha de barra: rótulo | barra | valor. Passe o mouse para o valor bruto. -->
+        <DataTemplate x:Key="BarTemplate" x:DataType="vm:BarRow">
+            <Grid ColumnDefinitions="150,*,36" Height="22" Background="Transparent" ToolTip.Tip="{Binding Tooltip}">
+                <TextBlock Grid.Column="0" Text="{Binding Label}" FontSize="12" VerticalAlignment="Center"
+                           TextTrimming="CharacterEllipsis" Classes.strong="{Binding IsHighlighted}" />
+                <controls:MeterBar Grid.Column="1" Value="{Binding Value}" Minimum="{Binding Minimum}" Maximum="{Binding Maximum}"
+                                   Origin="{Binding Origin}" Reference="{Binding Reference}" IsMuted="{Binding IsMuted}" />
+                <TextBlock Grid.Column="2" Text="{Binding ValueText}" FontSize="12" Opacity="0.75"
+                           HorizontalAlignment="Right" VerticalAlignment="Center" />
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="RoleBarTemplate" x:DataType="vm:BarRow">
+            <Grid ColumnDefinitions="130,*,30,36" Height="22" Background="Transparent" ToolTip.Tip="{Binding Tooltip}">
+                <TextBlock Grid.Column="0" Text="{Binding Label}" FontSize="12" VerticalAlignment="Center"
+                           TextTrimming="CharacterEllipsis" Classes.strong="{Binding IsHighlighted}" />
+                <controls:MeterBar Grid.Column="1" Value="{Binding Value}" Reference="{Binding Reference}" IsMuted="{Binding IsMuted}" />
+                <TextBlock Grid.Column="2" Text="{Binding ValueText}" FontSize="12" Opacity="0.75"
+                           HorizontalAlignment="Right" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="3" Text="{Binding Note}" FontSize="11" Opacity="0.6"
+                           HorizontalAlignment="Right" VerticalAlignment="Center" />
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="ChipTemplate" x:DataType="x:String">
+            <Border Classes="badge" Margin="0,0,6,6">
+                <TextBlock Text="{Binding}" FontSize="12" />
+            </Border>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <StackPanel Margin="20,12,12,28" Spacing="14">
+        <!-- Cabeçalho -->
+        <StackPanel Spacing="4">
+            <TextBlock Classes="h1" Text="{Binding Name}" />
+            <TextBlock Classes="hint" Text="{Binding Subtitle}" />
+            <TextBlock Classes="warn" FontSize="12" Text="{Binding Alerts}" IsVisible="{Binding HasAlerts}" />
+        </StackPanel>
+
+        <!-- Decisões do anão: funções (selos) e plano de pontos. Nada é automático; ficam salvas por mundo. -->
+        <Border Classes="card" MaxWidth="856" HorizontalAlignment="Left" DataContext="{Binding Plan}" x:DataType="vm:PlanEditorViewModel">
+            <StackPanel Spacing="10">
+                <TextBlock FontSize="12" Text="{Binding OriginText}" IsVisible="{Binding HasOrigin}"
+                           Classes.hint="{Binding !IsFromAi}" Classes.ai="{Binding IsFromAi}" />
+
+                <!-- Funções -->
+                <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12">
+                        <TextBlock Classes="section" Text="Funções" VerticalAlignment="Center" />
+                        <TextBlock Classes="hint" FontSize="12" VerticalAlignment="Center"
+                                   Text="Depois do embarque, só quem tem a função faz aquele trabalho." />
+                    </StackPanel>
+                    <Button Grid.Column="1" Content="Sugerir" Command="{Binding SuggestRolesCommand}"
+                            ToolTip.Tip="Funções sugeridas pelo app, pela análise de atributos de todos os anões" />
+                </Grid>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <ItemsControl ItemsSource="{Binding Roles}" VerticalAlignment="Center">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="6" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:RoleChipViewModel">
+                                <Border Classes="badge accent" Padding="8,2,2,2">
+                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                        <TextBlock Text="{Binding Name}" FontSize="12" Foreground="#0b0b0b" VerticalAlignment="Center" />
+                                        <Button Content="✕" FontSize="10" Padding="4,0" MinHeight="0" Background="Transparent"
+                                                Foreground="#0b0b0b" Command="{Binding RemoveCommand}" ToolTip.Tip="Tirar esta função" />
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock Classes="hint" VerticalAlignment="Center" IsVisible="{Binding !HasRoles}" Text="Nenhuma função." />
+                    <ComboBox ItemsSource="{Binding AvailableRoles}" SelectedItem="{Binding NewRole}" Width="200"
+                              PlaceholderText="Adicionar função...">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="core:EmbarkRole">
+                                <TextBlock Text="{Binding Name}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <Button Content="Adicionar" Command="{Binding AddRoleCommand}" />
+                </StackPanel>
+
+                <!-- Plano de pontos -->
+                <Grid ColumnDefinitions="*,Auto" Margin="0,6,0,0">
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12">
+                        <TextBlock Classes="section" Text="Plano de pontos" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding BudgetText}" FontSize="12" VerticalAlignment="Center"
+                                   Classes.hint="{Binding !IsOverBudget}" Classes.warn="{Binding IsOverBudget}" />
+                        <TextBlock Classes="hint" FontSize="12" VerticalAlignment="Center" Text="{Binding GameStatusText}" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                        <Button Content="Limpar" Command="{Binding ClearCommand}" ToolTip.Tip="Tira todos os pontos do plano (as funções ficam)" />
+                        <Button Classes="accent" Content="Aplicar no jogo" Command="{Binding ApplyCommand}" IsVisible="{Binding CanWriteToGame}"
+                                ToolTip.Tip="Escreve no jogo as habilidades deste plano (mostra antes o que vai mudar)" />
+                    </StackPanel>
+                </Grid>
+
+                <TextBlock Classes="hint" IsVisible="{Binding !HasRows}"
+                           Text="Nenhuma habilidade no plano. Adicione abaixo ou cole a resposta de uma IA na subaba Resumo (IA)." />
+                <ItemsControl ItemsSource="{Binding Rows}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:PlanRowViewModel">
+                            <Grid ColumnDefinitions="200,Auto,32,Auto,110,Auto" Margin="0,1">
+                                <TextBlock Grid.Column="0" Text="{Binding Name}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                <Button Grid.Column="1" Content="−" Padding="10,2" Command="{Binding DecreaseCommand}" ToolTip.Tip="Um nível a menos" />
+                                <TextBlock Grid.Column="2" Text="{Binding Level}" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                <Button Grid.Column="3" Content="+" Padding="10,2" Command="{Binding IncreaseCommand}" ToolTip.Tip="Um nível a mais" />
+                                <TextBlock Grid.Column="4" Classes="hint" Margin="10,0,0,0" Text="{Binding LevelName}" VerticalAlignment="Center" />
+                                <Button Grid.Column="5" Content="✕" Padding="8,2" Command="{Binding RemoveCommand}" ToolTip.Tip="Tirar do plano" />
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <ComboBox ItemsSource="{Binding AvailableSkills}" SelectedItem="{Binding NewSkill}" Width="300"
+                              PlaceholderText="Adicionar habilidade..." MaxDropDownHeight="360" />
+                    <Button Content="Adicionar" Command="{Binding AddCommand}" />
+                </StackPanel>
+
+                <TextBlock Classes="warn" FontSize="12" Text="{Binding Problems}" TextWrapping="Wrap" IsVisible="{Binding HasProblems}" />
+
+                <!-- Confirmação antes de escrever no jogo -->
+                <Border IsVisible="{Binding IsConfirming}" BorderBrush="#E0A030" BorderThickness="1" CornerRadius="6" Padding="12,8">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="{Binding PendingChanges}" TextWrapping="Wrap" />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Classes="accent" Content="Confirmar" Command="{Binding ConfirmApplyCommand}" />
+                            <Button Content="Cancelar" Command="{Binding CancelApplyCommand}" />
+                            <ProgressBar IsIndeterminate="True" Width="60" IsVisible="{Binding IsApplying}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+                <TextBlock FontSize="12" Text="{Binding ApplyMessage}" TextWrapping="Wrap" IsVisible="{Binding HasApplyMessage}"
+                           Classes.warn="{Binding ApplyFailed}" />
+            </StackPanel>
+        </Border>
+
+        <WrapPanel>
+            <Border Classes="card sheet">
+                <StackPanel Spacing="4">
+                    <TextBlock Classes="section" Text="Atributos físicos" />
+                    <TextBlock Classes="hint" Margin="0,0,0,6"
+                               Text="Comparados com a mediana da raça (traço): azul acima, vermelho abaixo." />
+                    <ItemsControl ItemsSource="{Binding PhysicalBars}" ItemTemplate="{StaticResource BarTemplate}" />
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card sheet">
+                <StackPanel Spacing="4">
+                    <TextBlock Classes="section" Text="Aptidão por função" />
+                    <TextBlock Classes="hint" Margin="0,0,0,6"
+                               Text="Nota 0–100 pelos atributos da função (traço = mediano). Em destaque, as sugeridas; à direita, a posição entre os anões." />
+                    <ItemsControl ItemsSource="{Binding RoleBars}" ItemTemplate="{StaticResource RoleBarTemplate}" />
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card sheet">
+                <StackPanel Spacing="4">
+                    <TextBlock Classes="section" Text="Atributos mentais" />
+                    <TextBlock Classes="hint" Margin="0,0,0,6"
+                               Text="Comparados com a mediana da raça (traço): azul acima, vermelho abaixo." />
+                    <ItemsControl ItemsSource="{Binding MentalBars}" ItemTemplate="{StaticResource BarTemplate}" />
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card sheet">
+                <StackPanel Spacing="4">
+                    <TextBlock Classes="section" Text="Personalidade" />
+                    <TextBlock Classes="hint" Margin="0,0,0,6"
+                               Text="Só os traços fora do neutro (40–60), do mais forte para o mais fraco. Azul: mais do traço; vermelho: menos." />
+                    <ItemsControl ItemsSource="{Binding FacetBars}" ItemTemplate="{StaticResource BarTemplate}" />
+                    <TextBlock Classes="hint" Text="Nenhum traço fora do neutro." IsVisible="{Binding !HasFacets}" />
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card sheet">
+                <StackPanel Spacing="4">
+                    <TextBlock Classes="section" Text="Crenças e sonho" />
+                    <TextBlock Classes="hint" Margin="0,0,0,6"
+                               Text="Crenças em que o anão difere da sua cultura (-50 despreza, +50 valoriza muito)." />
+                    <ItemsControl ItemsSource="{Binding BeliefBars}" ItemTemplate="{StaticResource BarTemplate}" />
+                    <TextBlock Classes="hint" Text="Pensa como a sua cultura em tudo." IsVisible="{Binding !HasBeliefs}" />
+                    <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,8,0,0" IsVisible="{Binding HasDreams}">
+                        <TextBlock Text="Sonho:" FontWeight="SemiBold" FontSize="12" />
+                        <TextBlock Text="{Binding Dreams}" FontSize="12" TextWrapping="Wrap" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card sheet">
+                <StackPanel Spacing="6">
+                    <TextBlock Classes="section" Text="Gostos" />
+                    <ItemsControl ItemsSource="{Binding PreferenceGroups}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:PreferenceGroup">
+                                <Grid ColumnDefinitions="120,*" Margin="0,2">
+                                    <TextBlock Grid.Column="0" Text="{Binding Kind}" FontSize="12" Opacity="0.7"
+                                               Classes.warn="{Binding IsHate}" />
+                                    <SelectableTextBlock Grid.Column="1" Text="{Binding Items}" FontSize="12" TextWrapping="Wrap" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock Classes="hint" Text="Sem gostos lidos." IsVisible="{Binding !HasPreferences}" />
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card sheet">
+                <StackPanel Spacing="6">
+                    <TextBlock Classes="section" Text="Habilidades" />
+                    <TextBlock Classes="hint" Text="Escolhidas no embarque" IsVisible="{Binding HasChosenSkills}" />
+                    <ItemsControl ItemsSource="{Binding ChosenSkills}" ItemTemplate="{StaticResource ChipTemplate}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                    <TextBlock Classes="hint" Text="Já sabe (não gastam pontos)" />
+                    <ItemsControl ItemsSource="{Binding BackgroundSkills}" ItemTemplate="{StaticResource ChipTemplate}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+        </WrapPanel>
+
+        <!-- Texto original do jogo (capturado da ficha aberta) -->
+        <Border Classes="card" MaxWidth="856" HorizontalAlignment="Left">
+            <StackPanel Spacing="8">
+                <TextBlock Classes="section" Text="Descrição do jogo" />
+                <controls:DfRichTextView Paragraphs="{Binding SheetParagraphs}" IsVisible="{Binding HasSheetText}" />
+                <TextBlock Classes="hint" Text="{Binding SheetInfo}" />
+            </StackPanel>
+        </Border>
+    </StackPanel>
+</UserControl>

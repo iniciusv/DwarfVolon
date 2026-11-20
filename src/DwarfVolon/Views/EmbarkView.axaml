@@ -1,28 +1,132 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:DwarfVolon.ViewModels"
+             xmlns:views="using:DwarfVolon.Views"
              xmlns:controls="using:DwarfVolon.Controls"
              x:Class="DwarfVolon.Views.EmbarkView"
              x:DataType="vm:EmbarkViewModel">
     <DockPanel>
-        <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="28,16,28,8">
+        <!-- Barra de cima: vale para as duas subabas -->
+        <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="28,16,28,4">
             <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                 <Button Classes="accent" Content="Atualizar" Command="{Binding RefreshCommand}"
                         ToolTip.Tip="Lê de novo a tela de embarque do jogo" />
                 <CheckBox Content="Atualizar automaticamente" IsChecked="{Binding AutoRefresh}"
-                          ToolTip.Tip="Relê o jogo a cada 3 segundos enquanto ligado" />
+                          ToolTip.Tip="Relê o jogo a cada 3 segundos. Também captura o texto das fichas que você abrir no jogo." />
                 <ProgressBar IsIndeterminate="True" Width="60" IsVisible="{Binding IsBusy}" />
                 <TextBlock VerticalAlignment="Center" Text="{Binding StatusText}" TextTrimming="CharacterEllipsis"
                            Classes.hint="{Binding !HasError}" Classes.warn="{Binding HasError}" />
             </StackPanel>
-            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                <TextBlock x:Name="CopiedText" Classes="hint" VerticalAlignment="Center" />
-                <Button Content="Copiar Markdown" Click="Copy_Click"
-                        ToolTip.Tip="Copia as tabelas em Markdown para colar numa IA" />
-            </StackPanel>
         </Grid>
-        <ScrollViewer>
-            <controls:MarkdownView Margin="28,0,28,28" HorizontalAlignment="Left" Markdown="{Binding Markdown}" />
-        </ScrollViewer>
+
+        <TabControl Classes="sub" Margin="16,0,0,0" SelectedIndex="{Binding SelectedTab}">
+            <TabItem Header="Anões">
+                <Grid>
+                    <TextBlock Classes="hint" Margin="12,16" IsVisible="{Binding !HasDwarves}"
+                               Text="Abra a tela Preparar com cuidado no jogo e clique em Atualizar. As fichas dos anões aparecem aqui." />
+                    <DockPanel IsVisible="{Binding HasDwarves}">
+                        <!-- Ações para todos os anões -->
+                        <StackPanel DockPanel.Dock="Top" Margin="4,10,28,0" Spacing="6">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Button Content="Sugerir funções para todos" Command="{Binding SuggestRolesForAllCommand}"
+                                        ToolTip.Tip="Troca as funções de todos os anões pela sugestão do app (análise de atributos)" />
+                                <Button Classes="accent" Content="Aplicar todos no jogo" Command="{Binding ApplyAllCommand}"
+                                        IsVisible="{Binding CanWriteToGame}"
+                                        ToolTip.Tip="Escreve no jogo o plano de pontos de todos os anões (mostra antes o que vai mudar)" />
+                                <TextBlock Classes="hint" VerticalAlignment="Center" Text="{Binding PlanFileText}" />
+                            </StackPanel>
+                            <Border IsVisible="{Binding IsConfirmingApplyAll}" BorderBrush="#E0A030" BorderThickness="1" CornerRadius="6"
+                                    Padding="12,8" MaxWidth="1100" HorizontalAlignment="Left">
+                                <StackPanel Spacing="8">
+                                    <TextBlock Text="Vai mudar no jogo:" FontWeight="SemiBold" />
+                                    <SelectableTextBlock Text="{Binding PendingApplyAll}" TextWrapping="Wrap" FontSize="12" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Button Classes="accent" Content="Confirmar" Command="{Binding ConfirmApplyAllCommand}" />
+                                        <Button Content="Cancelar" Command="{Binding CancelApplyAllCommand}" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                            <TextBlock FontSize="12" Text="{Binding ApplyAllMessage}" TextWrapping="Wrap"
+                                       IsVisible="{Binding HasApplyAllMessage}" Classes.warn="{Binding ApplyAllFailed}" />
+                        </StackPanel>
+                    <Grid ColumnDefinitions="250,*">
+                        <ListBox Grid.Column="0" Classes="nav" Margin="0,8,0,0"
+                                 ItemsSource="{Binding Dwarves}" SelectedItem="{Binding SelectedDwarf}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate x:DataType="vm:DwarfSheetViewModel">
+                                    <StackPanel Spacing="1">
+                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Classes="hint" Text="{Binding Plan.RolesText}" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Classes="hint warn" Text="{Binding Alerts}" IsVisible="{Binding HasAlerts}"
+                                                   TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        <ScrollViewer Grid.Column="1">
+                            <ContentControl Content="{Binding SelectedDwarf}">
+                                <ContentControl.ContentTemplate>
+                                    <DataTemplate x:DataType="vm:DwarfSheetViewModel">
+                                        <views:DwarfSheetView />
+                                    </DataTemplate>
+                                </ContentControl.ContentTemplate>
+                            </ContentControl>
+                        </ScrollViewer>
+                    </Grid>
+                    </DockPanel>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Resumo (IA)">
+                <ScrollViewer>
+                    <StackPanel Margin="12,8,28,28" Spacing="16">
+                        <!-- Conversa com a IA: três passos separados, para poder conversar entre eles -->
+                        <Border Classes="card" MaxWidth="900" HorizontalAlignment="Left" IsVisible="{Binding HasAnalysis}">
+                            <StackPanel Spacing="12">
+                                <TextBlock Classes="h2" Text="Conversar com uma IA" />
+
+                                <Grid ColumnDefinitions="210,*" ColumnSpacing="12">
+                                    <Button Grid.Column="0" HorizontalAlignment="Stretch" Content="1. Copiar resumo" Click="CopySummary_Click"
+                                            ToolTip.Tip="Copia os dados do embarque (as tabelas abaixo)" />
+                                    <TextBlock Grid.Column="1" Classes="hint" VerticalAlignment="Center"
+                                               Text="Os dados dos anões. Mande primeiro e converse à vontade: análise, recomendações, o que você quer fazer na fortaleza." />
+                                </Grid>
+
+                                <Grid ColumnDefinitions="210,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="6">
+                                    <Button Grid.Column="0" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Top"
+                                            Content="2. Copiar pedido de pontos" Click="CopyRequest_Click"
+                                            ToolTip.Tip="Copia o pedido de distribuição: suas instruções, as regras e o formato da resposta" />
+                                    <TextBox Grid.Column="1" Grid.Row="0" Text="{Binding AiInstructions}" AcceptsReturn="True" TextWrapping="Wrap"
+                                             MinHeight="60" PlaceholderText="Instruções para a distribuição (opcional). Ex.: não gaste muitos pontos em habilidades que sobem rápido jogando, como mineração; 1 ponto basta." />
+                                    <CheckBox Grid.Column="1" Grid.Row="1" Content="Incluir o resumo junto (se ainda não mandou)"
+                                              IsChecked="{Binding IncludeSummaryInRequest}" />
+                                </Grid>
+
+                                <Grid ColumnDefinitions="210,*" ColumnSpacing="12">
+                                    <Button Grid.Column="0" Classes="accent" HorizontalAlignment="Stretch" VerticalAlignment="Top"
+                                            Content="3. Colar resposta da IA" Click="PasteResponse_Click"
+                                            ToolTip.Tip="Lê o bloco dwarfvolon-pontos da resposta copiada e carrega o plano nas fichas" />
+                                    <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
+                                        <TextBlock Classes="hint" IsVisible="{Binding !HasImportMessage}"
+                                                   Text="Copie a resposta inteira da IA e clique aqui. O plano vai para a ficha de cada anão, onde você revisa." />
+                                        <TextBlock Text="{Binding ImportMessage}" TextWrapping="Wrap" IsVisible="{Binding HasImportMessage}"
+                                                   Classes.warn="{Binding ImportFailed}" />
+                                        <SelectableTextBlock Text="{Binding ImportProblems}" FontSize="12" TextWrapping="Wrap" Opacity="0.8"
+                                                             IsVisible="{Binding HasImportProblems}" />
+                                    </StackPanel>
+                                </Grid>
+
+                                <StackPanel Orientation="Horizontal" Spacing="12">
+                                    <Button Content="Copiar plano atual" Click="CopyPlan_Click"
+                                            ToolTip.Tip="Copia o plano das fichas no mesmo formato, para mostrar à IA ou guardar" />
+                                    <TextBlock x:Name="CopiedText" Classes="hint" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <controls:MarkdownView HorizontalAlignment="Left" Markdown="{Binding Markdown}" />
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
     </DockPanel>
 </UserControl>

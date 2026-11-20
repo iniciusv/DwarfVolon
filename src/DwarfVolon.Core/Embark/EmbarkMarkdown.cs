@@ -8,7 +8,7 @@ namespace DwarfVolon.Core.Embark;
 public static class EmbarkMarkdown
 {
     /// <summary>Colunas possíveis da tabela de anões (para o seletor de colunas e para a IA).</summary>
-    public static MarkdownTableSchema<EmbarkDwarf> DwarfSchema(EmbarkAnalysis analysis)
+    public static MarkdownTableSchema<EmbarkDwarf> DwarfSchema(EmbarkAnalysis analysis, EmbarkPlan? plan = null)
     {
         var s = analysis.Snapshot;
         var schema = new MarkdownTableSchema<EmbarkDwarf>()
@@ -17,11 +17,22 @@ public static class EmbarkMarkdown
             .Add("nome_en", "Nome (inglês)", d => d.NameEnglish, description: "Nome traduzido")
             .Add("sexo", "Sexo", d => DfNames.Sex(d.Sex), MdAlign.Center, "F ou M")
             .Add("idade", "Idade", d => s.AgeOf(d), MdAlign.Right, "Idade em anos")
-            .Add("habilidades", "Habilidades atuais", d => SkillList(d, s), description: "Habilidades escolhidas agora, com nível")
+            .Add("apelido", "Apelido", d => d.Nickname, description: "Apelido dado no jogo")
+            .Add("habilidades", "Escolhidas", d => SkillList(d.Skills, s), description: "Habilidades escolhidas no embarque, com nível")
+            .Add("ja_sabe", "Já sabe", d => SkillList(d.BackgroundSkills, s), description: "Habilidades que o anão já traz (não gastam pontos)")
             .Add("livres", "Pontos livres", d => d.PicksLeft, MdAlign.Right, "Pontos de habilidade que o anão ainda pode receber")
-            .Add("plano", "Plano sugerido", d => Plan(analysis, d), description: "Funções e níveis sugeridos")
+            .Add("funcoes", "Funções", d => RoleList(analysis, plan, d), description: "Funções definidas (pelo jogador, pela IA ou pelo botão Sugerir)")
+            .Add("pontos", "Plano de pontos", d => PointsList(analysis, plan, d), description: "Níveis planejados para comprar no embarque")
             .Add("personalidade", "Personalidade", d => string.Join(", ", EmbarkAnalyzer.PersonalityNotes(d)),
-                description: "Traços que pesam no humor (estresse, ansiedade...)");
+                description: "Traços que pesam no humor (estresse, ansiedade...)")
+            .Add("gostos", "Gostos", d => string.Join(", ", d.Preferences.Where(p => p.Kind != "HateCreature").Select(PreferenceText)),
+                description: "O que o anão gosta (nomes do jogo, em inglês)")
+            .Add("odeia", "Odeia", d => string.Join(", ", d.Preferences.Where(p => p.Kind == "HateCreature").Select(PreferenceText)),
+                description: "Criaturas que o anão odeia")
+            .Add("crencas", "Crenças", d => string.Join(", ", d.Beliefs.Where(b => Math.Abs(b.Strength) > 10)
+                    .OrderByDescending(b => Math.Abs(b.Strength)).Select(b => $"{DfNames.Belief(b.Id)} {b.Strength:+0;-0}")),
+                description: "Crenças pessoais fortes (-50 a 50; positivo = valoriza)")
+            .Add("sonho", "Sonho", d => string.Join(", ", d.Dreams.Select(DfNames.Dream)), description: "Sonho de vida do anão");
 
         foreach (var attr in DfNames.PhysicalAttributes.Concat(DfNames.MentalAttributes))
             schema.Add(attr.ToLowerInvariant(), DfNames.Attribute(attr), d => analysis.AttributeScore(d, attr), MdAlign.Right,
@@ -30,7 +41,11 @@ public static class EmbarkMarkdown
         return schema;
     }
 
-    public static string Build(EmbarkAnalysis analysis)
+    /// <summary>
+    /// Resumo para a IA. Não inclui as descrições capturadas das fichas do jogo: elas repetem o que
+    /// os números já dizem e gastariam muito contexto (ficam só na ficha da tela).
+    /// </summary>
+    public static string Build(EmbarkAnalysis analysis, EmbarkPlan? plan = null)
     {
         var s = analysis.Snapshot;
         var md = new MarkdownBuilder().Heading(1, "Embarque");
@@ -41,27 +56,21 @@ public static class EmbarkMarkdown
         if (s.Dwarves.Count == 0)
             return md.Paragraph("Nenhum anão na tela de embarque.").ToString();
 
-        md.Heading(2, "Sugestão de funções")
-          .Table(["Função", "Anão", "Nota", "Nível atual", "Sugerido", "Por quê"],
-              analysis.Assignments.Select(a => (IReadOnlyList<object?>)
-              [
-                  a.IsPrimary ? $"**{a.Role.Name}**" : a.Role.Name,
-                  a.Dwarf.DisplayName,
-                  a.Fit.Score,
-                  a.Fit.CurrentLevel > 0 ? $"{a.Fit.CurrentLevel} ({DfNames.SkillLevel(a.Fit.CurrentLevel)})" : "-",
-                  a.SuggestedLevel > 0 ? $"{a.SuggestedLevel} ({DfNames.SkillLevel(a.SuggestedLevel)})" : "-",
-                  Reason(a.Fit),
-              ]),
-              [MdAlign.Left, MdAlign.Left, MdAlign.Right, MdAlign.Left, MdAlign.Left, MdAlign.Left])
-          .Paragraph("Em **negrito**, a função principal de cada anão. A **nota** (0–100) é a média dos atributos que ajudam na " +
-                     "habilidade, comparados com a mediana da raça (50 = mediano). Os níveis sugeridos usam todos os pontos de " +
-                     $"habilidade do anão (os livres mais os já gastos), até {EmbarkAnalyzer.MaxEmbarkLevel} (Proficiente) por habilidade.");
-
+        var schema = DwarfSchema(analysis, plan);
         md.Heading(2, "Anões")
-          .Table(DwarfSchema(analysis), s.Dwarves, ["num", "nome", "sexo", "idade", "habilidades", "livres", "plano", "personalidade"]);
+          .Table(schema, s.Dwarves, ["nome", "sexo", "idade", "habilidades", "livres", "personalidade", "ja_sabe"]);
+
+        if (plan is not null && s.Dwarves.Any(plan.Has))
+            md.Heading(2, "Decisões até agora")
+              .Paragraph("Funções e pontos já decididos (pelo jogador ou numa resposta anterior).")
+              .Table(schema, s.Dwarves.Where(plan.Has), ["nome", "funcoes", "pontos"]);
+
+        md.Heading(2, "Gostos, crenças e sonhos")
+          .Table(schema, s.Dwarves, ["nome", "gostos", "odeia", "crencas", "sonho"]);
 
         md.Heading(2, "Nota por função")
-          .Paragraph("Quanto cada anão combina com cada função (0–100). Em negrito, o melhor de cada coluna.");
+          .Paragraph("Quanto cada anão combina com cada função (0–100): média dos atributos que ajudam na habilidade, " +
+                     "comparados com a mediana da raça (50 = mediano). Em negrito, o melhor de cada coluna.");
         var roles = analysis.Roles;
         md.Table(
             ["Anão", .. roles.Select(r => r.Name)],
@@ -79,9 +88,9 @@ public static class EmbarkMarkdown
         md.Heading(2, "Atributos")
           .Paragraph("Nota de cada atributo (0–100, 50 = mediana da raça).")
           .Heading(3, "Físicos")
-          .Table(DwarfSchema(analysis), s.Dwarves, ["nome", .. DfNames.PhysicalAttributes.Select(a => a.ToLowerInvariant())])
+          .Table(schema, s.Dwarves, ["nome", .. DfNames.PhysicalAttributes.Select(a => a.ToLowerInvariant())])
           .Heading(3, "Mentais")
-          .Table(DwarfSchema(analysis), s.Dwarves, ["nome", .. DfNames.MentalAttributes.Select(a => a.ToLowerInvariant())]);
+          .Table(schema, s.Dwarves, ["nome", .. DfNames.MentalAttributes.Select(a => a.ToLowerInvariant())]);
 
         md.Heading(2, "Funções consideradas")
           .Table(["Função", "Habilidade", "Atributos", "Motivo"],
@@ -109,20 +118,16 @@ public static class EmbarkMarkdown
         ])
         .ToString();
 
-    private static string SkillList(EmbarkDwarf d, EmbarkSnapshot s) =>
-        d.Skills.Count == 0 ? "-" : string.Join(", ", d.Skills.Select(k => $"{DfNames.Skill(k.Id, s.SkillCaptions)} {k.Level}"));
+    private static string PreferenceText(EmbarkPreference p) =>
+        string.IsNullOrWhiteSpace(p.Text) ? DfNames.PreferenceKind(p.Kind).ToLowerInvariant() : p.Text;
 
-    private static string Plan(EmbarkAnalysis analysis, EmbarkDwarf d) =>
-        string.Join(" · ", analysis.AssignmentsFor(d).Select(a => $"{a.Role.Name} {a.SuggestedLevel}"));
+    private static string SkillList(IReadOnlyList<EmbarkSkill> skills, EmbarkSnapshot s) =>
+        skills.Count == 0 ? "-" : string.Join(", ", skills.Select(k => $"{DfNames.Skill(k.Id, s.SkillCaptions)} {k.Level}"));
 
-    private static string Reason(RoleFit fit)
-    {
-        var parts = new List<string>();
-        if (fit.Strengths.Count > 0)
-            parts.Add("bom em " + string.Join(", ", fit.Strengths.Take(3).Select(a => $"{DfNames.Attribute(a.Attribute)} ({a.Score})")));
-        if (fit.Weaknesses.Count > 0)
-            parts.Add("fraco em " + string.Join(", ", fit.Weaknesses.Take(2).Select(a => $"{DfNames.Attribute(a.Attribute)} ({a.Score})")));
-        if (fit.CurrentLevel > 0) parts.Add("já tem a habilidade");
-        return parts.Count == 0 ? "atributos medianos" : string.Join("; ", parts);
-    }
+    private static string RoleList(EmbarkAnalysis analysis, EmbarkPlan? plan, EmbarkDwarf d) =>
+        plan is null ? "" : string.Join(", ", plan.RolesOf(d).Select(id => analysis.Roles.FirstOrDefault(r => r.Id == id)?.Name ?? id));
+
+    private static string PointsList(EmbarkAnalysis analysis, EmbarkPlan? plan, EmbarkDwarf d) =>
+        plan is null ? "" : string.Join(", ", plan.For(d).OrderByDescending(kv => kv.Value)
+            .Select(kv => $"{DfNames.Skill(kv.Key, analysis.Snapshot.SkillCaptions)} {kv.Value}"));
 }

@@ -111,3 +111,27 @@ Formato curto: contexto → decisão → consequências. Decisões novas vão no
 **Decisão.** Uma heurística determinística no Core (`EmbarkAnalyzer`): nota de cada atributo comparada com a faixa da casta lida do jogo (mediana = 50), nota por função = média dos atributos da função (`funcoes.json`, editável) e distribuição das funções com o algoritmo húngaro por rodada (principal e depois secundária). O resultado é um documento Markdown com o motivo de cada escolha.
 
 **Consequências.** Funciona sem IA e é testável. O mapeamento de habilidade para atributos é aproximado (wiki do DF). As mesmas tabelas servem de contexto para a IA refinar a sugestão depois.
+
+## D15 – Descrições dos anões: texto original do jogo, capturado da ficha aberta
+
+**Contexto.** A ficha do anão precisava das descrições do jogo ("She is quick to anger..."). O DFHack não expõe o gerador desses textos; o DF só os monta quando a ficha da unidade está aberta (`view_sheets.personality_raw_str`). As alternativas eram escrever textos próprios em pt-BR (cerca de 300 frases) ou fazer o app abrir a ficha no jogo (mexer na interface do jogo).
+
+**Decisão.** Usar o texto original, em inglês, capturado na leitura normal do embarque quando a ficha de um dos anões está aberta na aba Personalidade. O app guarda por anão e aba (`EmbarkSheetCache`) e mostra com as cores do jogo. Os nomes do jogo (gostos, materiais, criaturas) também ficam em inglês.
+
+**Consequências.** Texto exato e sem traduções para manter, mas é preciso abrir a ficha de cada anão uma vez (com a atualização automática ligada). Os dados numéricos (barras) não dependem disso. O texto guardado dura só a sessão do app.
+
+## D16 – Protocolo de texto com a IA: pedido separado do contexto e resposta em bloco marcado
+
+**Contexto.** A IA deve poder sugerir a distribuição de pontos, e o jogador quer conversar antes (análise, objetivos da fortaleza) e só depois pedir a distribuição. O chat integrado (Fase 4) ainda não existe.
+
+**Decisão.** Três peças copiáveis em separado: o **resumo** (contexto), o **pedido** (instruções do jogador, regras, limites por anão, habilidades disponíveis e formato da resposta) e a **resposta**, que a IA devolve num bloco de código `dwarfvolon-pontos` (uma linha `Nome: ID nível, ...` por anão). O app lê o bloco com tolerância (acentos, nomes em pt-BR, sem crases) e só carrega no plano da ficha; nada vai para o jogo sem revisão. O resumo não leva as descrições capturadas das fichas, para não gastar contexto.
+
+**Consequências.** Funciona hoje com qualquer IA de chat, sem integração, e o jogador decide quando mandar cada parte. O mesmo formato serve para o chat integrado e para guardar planos. Pedidos para outras tarefas seguem o mesmo padrão: um bloco com linguagem própria `dwarfvolon-<tarefa>`.
+
+## D17 – Decisões do embarque: nada automático, salvas por mundo, aplicadas com confirmação
+
+**Contexto.** A primeira versão mostrava funções e níveis sugeridos automaticamente, e o jogador não sabia o que tinha vindo do app, da IA ou dele mesmo. Ele também quer que as escolhas do embarque (ex.: quem são os mineradores) sirvam depois, na fortaleza.
+
+**Decisão.** Funções e pontos são **decisões** (`EmbarkPlan`) que só mudam pelo jogador (editor da ficha), pela IA (resposta colada) ou pelo botão **Sugerir** (só funções). Cada anão guarda a origem. As decisões são salvas a cada mudança em `%APPDATA%\DwarfVolon\embarques\<pasta do mundo>.json`, com a figura histórica de cada anão (que continua a mesma depois do embarque). O plano de pontos pode ser escrito no jogo (`embark_apply.lua`): mostra o que vai mudar, pede confirmação, valida tudo antes de mudar e relê a tela depois.
+
+**Consequências.** O resumo para a IA leva as decisões já tomadas, não sugestões. A Fase 3 pode usar o arquivo salvo para designar os trabalhos. As regras de custo dos níveis ainda são supostas (1 ponto por nível, até 5, sem gastar pontos de embarque) e precisam ser conferidas na tela do jogo.

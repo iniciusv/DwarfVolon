@@ -12,9 +12,24 @@ public partial class EmbarkView : UserControl
         InitializeComponent();
     }
 
-    private async void Copy_Click(object? sender, RoutedEventArgs e)
+    private EmbarkViewModel? Vm => DataContext as EmbarkViewModel;
+
+    private async void CopySummary_Click(object? sender, RoutedEventArgs e) =>
+        await CopyAsync(Vm?.SummaryForAi, "Resumo copiado.");
+
+    private async void CopyRequest_Click(object? sender, RoutedEventArgs e) =>
+        await CopyAsync(Vm?.PointsRequestForAi(), "Pedido copiado.");
+
+    private async void CopyPlan_Click(object? sender, RoutedEventArgs e) =>
+        await CopyAsync(Vm?.PlanForAi(), "Plano copiado.");
+
+    private async void PasteResponse_Click(object? sender, RoutedEventArgs e)
     {
-        if (DataContext is EmbarkViewModel vm && await ClipboardHelper.CopyAsync(this, vm.Markdown))
-            CopiedText.Text = "Copiado!";
+        if (Vm is { } vm) vm.ImportAiResponse(await ClipboardHelper.GetTextAsync(this));
+    }
+
+    private async Task CopyAsync(string? text, string done)
+    {
+        CopiedText.Text = await ClipboardHelper.CopyAsync(this, text) ? done : "Nada para copiar ainda.";
     }
 }

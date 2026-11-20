@@ -13,4 +13,8 @@ internal static class ClipboardHelper
         await clipboard.SetTextAsync(text);
         return true;
     }
+
+    /// <summary>Lê o texto da área de transferência (nulo se não houver texto).</summary>
+    public static async Task<string?> GetTextAsync(Visual visual) =>
+        TopLevel.GetTopLevel(visual)?.Clipboard is { } clipboard ? await clipboard.TryGetTextAsync() : null;
 }
