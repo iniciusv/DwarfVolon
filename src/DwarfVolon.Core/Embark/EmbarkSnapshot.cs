@@ -23,6 +23,29 @@ public sealed record EmbarkPreference(string Kind, string Text);
 public sealed record EmbarkBelief(string Id, int Strength);
 
 /// <summary>
+/// Um item escolhido para levar. <see cref="Type"/> é o tipo do jogo (ex.: WEAPON), <see cref="Subtype"/> o id do
+/// subtipo (ex.: ITEM_WEAPON_PICK, vazio se não tiver), <see cref="Material"/> o token (ex.: INORGANIC:IRON) e
+/// <see cref="Name"/> o nome no singular, em inglês, como o jogo mostra. <see cref="Line"/> é a linha da lista do jogo.
+/// </summary>
+public sealed record EmbarkItem(int Line, string Type, string Subtype, string Material, string Name, int Stack);
+
+/// <summary>Uma linha da lista de itens do jogo e quantas opções (materiais) dá para escolher nela.</summary>
+public sealed record EmbarkItemLine(int Line, string Type, string Subtype, int Options);
+
+/// <summary>
+/// Uma opção de animal da tela de embarque (espécie + casta + tipo) e quantos foram escolhidos.
+/// <see cref="Profession"/>: STANDARD (adulto), CHILD (filhote), TRAINED_HUNTER, TRAINED_WAR.
+/// <see cref="Value"/> é o valor do animal no jogo (PETVALUE).
+/// </summary>
+public sealed record EmbarkPet(int Index, string Creature, string Name, string Caste, string Profession, int Value,
+    bool Grazer, bool LaysEggs, bool Milkable, bool HuntsVermin, int Count)
+{
+    public bool IsFemale => Caste == "FEMALE";
+    public bool IsMale => Caste == "MALE";
+    public bool IsAdult => Profession != "CHILD";
+}
+
+/// <summary>
 /// Ficha de unidade aberta no jogo no momento da leitura. O DF só gera o texto de descrição
 /// (<c>view_sheets.personality_raw_str</c>) com a ficha aberta.
 /// </summary>
@@ -130,6 +153,15 @@ public sealed class EmbarkSnapshot
     /// <summary>Nome em inglês de cada habilidade, vindo do jogo.</summary>
     public IReadOnlyDictionary<string, string> SkillCaptions { get; init; } = new Dictionary<string, string>();
 
+    /// <summary>Itens escolhidos para levar.</summary>
+    public IReadOnlyList<EmbarkItem> Items { get; init; } = [];
+
+    /// <summary>Linhas da lista de itens do jogo (o que dá para comprar).</summary>
+    public IReadOnlyList<EmbarkItemLine> ItemLines { get; init; } = [];
+
+    /// <summary>Opções de animais (todas, com a quantidade escolhida em cada).</summary>
+    public IReadOnlyList<EmbarkPet> Pets { get; init; } = [];
+
     public int? AgeOf(EmbarkDwarf dwarf) =>
         dwarf.Age ?? (dwarf.BirthYear is { } born && CurrentYear > 0 && born > 0 ? CurrentYear - born : null);
 }
@@ -188,6 +220,10 @@ public static class EmbarkJson
             SkillTabs = (dto.SkillTabs ?? []).ToDictionary(kv => kv.Key, kv => (IReadOnlyList<string>)kv.Value),
             AttributeRanges = ranges,
             SkillCaptions = dto.SkillCaptions ?? [],
+            Items = (dto.Items ?? []).Select(i => new EmbarkItem(i.Line, i.Type ?? "", i.Subtype ?? "", i.Material ?? "", i.Name ?? "", i.Stack)).ToList(),
+            ItemLines = (dto.ItemLines ?? []).Select(l => new EmbarkItemLine(l.Line, l.Type ?? "", l.Subtype ?? "", l.Options)).ToList(),
+            Pets = (dto.Pets ?? []).Where(p => !string.IsNullOrEmpty(p.Creature)).Select(p => new EmbarkPet(p.Index, p.Creature!,
+                p.Name ?? p.Creature!, p.Caste ?? "", p.Profession ?? "", p.Value, p.Grazer, p.LaysEggs, p.Milkable, p.HuntsVermin, p.Count)).ToList(),
             Dwarves = (dto.Dwarves ?? []).Select(d => new EmbarkDwarf
             {
                 Index = d.Index,
@@ -235,6 +271,42 @@ public static class EmbarkJson
         public RangesDto? Ranges { get; set; }
         public List<DwarfDto>? Dwarves { get; set; }
         public SheetDto? Sheet { get; set; }
+        public List<ItemDto>? Items { get; set; }
+        public List<ItemLineDto>? ItemLines { get; set; }
+        public List<PetDto>? Pets { get; set; }
+    }
+
+    private sealed class ItemDto
+    {
+        public int Line { get; set; }
+        public string? Type { get; set; }
+        public string? Subtype { get; set; }
+        public string? Material { get; set; }
+        public string? Name { get; set; }
+        public int Stack { get; set; }
+    }
+
+    private sealed class ItemLineDto
+    {
+        public int Line { get; set; }
+        public string? Type { get; set; }
+        public string? Subtype { get; set; }
+        public int Options { get; set; }
+    }
+
+    private sealed class PetDto
+    {
+        public int Index { get; set; }
+        public string? Creature { get; set; }
+        public string? Name { get; set; }
+        public string? Caste { get; set; }
+        public string? Profession { get; set; }
+        public int Value { get; set; }
+        public bool Grazer { get; set; }
+        public bool LaysEggs { get; set; }
+        public bool Milkable { get; set; }
+        public bool HuntsVermin { get; set; }
+        public int Count { get; set; }
     }
 
     private sealed class SheetDto

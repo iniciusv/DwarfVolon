@@ -45,7 +45,8 @@ public static class EmbarkMarkdown
     /// Resumo para a IA. Não inclui as descrições capturadas das fichas do jogo: elas repetem o que
     /// os números já dizem e gastariam muito contexto (ficam só na ficha da tela).
     /// </summary>
-    public static string Build(EmbarkAnalysis analysis, EmbarkPlan? plan = null)
+    /// <param name="includeSupplies">Inclui a seção de itens e animais.</param>
+    public static string Build(EmbarkAnalysis analysis, EmbarkPlan? plan = null, bool includeSupplies = true)
     {
         var s = analysis.Snapshot;
         var md = new MarkdownBuilder().Heading(1, "Embarque");
@@ -91,6 +92,8 @@ public static class EmbarkMarkdown
           .Table(schema, s.Dwarves, ["nome", .. DfNames.PhysicalAttributes.Select(a => a.ToLowerInvariant())])
           .Heading(3, "Mentais")
           .Table(schema, s.Dwarves, ["nome", .. DfNames.MentalAttributes.Select(a => a.ToLowerInvariant())]);
+
+        if (includeSupplies) EmbarkSupplies.AppendSection(md, analysis, plan);
 
         md.Heading(2, "Funções consideradas")
           .Table(["Função", "Habilidade", "Atributos", "Motivo"],

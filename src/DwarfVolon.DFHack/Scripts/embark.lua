@@ -152,6 +152,74 @@ local function collect_dwarf(index, info, unit)
     return d
 end
 
+-- Itens escolhidos. s_item[linha] são os itens de verdade de cada linha da lista do jogo;
+-- etl.list[linha] são as opções (materiais) que dá para comprar naquela linha.
+local function collect_items(scr)
+    local items, lines = {}, {}
+    for line = 0, #scr.s_item - 1 do
+        local options = scr.etl.list[line]
+        if options and #options > 0 then
+            local first = options[0]
+            local def = first.item_subtype >= 0 and dfhack.items.getSubtypeDef(first.item_type, first.item_subtype)
+            table.insert(lines, {
+                line = line,
+                type = df.item_type[first.item_type] or tostring(first.item_type),
+                subtype = def and def.id or '',
+                options = #options,
+            })
+        end
+        for j = 0, #scr.s_item[line] - 1 do
+            local it = scr.s_item[line][j]
+            local ok, entry = pcall(function()
+                local def = it:getSubtype() >= 0 and dfhack.items.getSubtypeDef(it:getType(), it:getSubtype())
+                local mat = dfhack.matinfo.decode(it)
+                return {
+                    line = line,
+                    type = df.item_type[it:getType()] or '',
+                    subtype = def and def.id or '',
+                    material = mat and mat:getToken() or '',
+                    name = utf(dfhack.items.getDescription(it, 1, false)),
+                    stack = it.stack_size,
+                }
+            end)
+            if ok then table.insert(items, entry) end
+        end
+    end
+    return items, lines
+end
+
+-- Animais que dá para levar (etl.race/caste/profession) e quantos foram escolhidos
+-- (chosen_pet_index aponta para essa lista; chosen_pet_num é a quantidade).
+local function collect_pets(scr)
+    local chosen = {}
+    for k = 0, #scr.chosen_pet_index - 1 do
+        local idx = scr.chosen_pet_index[k]
+        chosen[idx] = (chosen[idx] or 0) + (scr.chosen_pet_num[k] or 0)
+    end
+    local pets = {}
+    for i = 0, #scr.etl.race - 1 do
+        local c = df.creature_raw.find(scr.etl.race[i])
+        local caste = c and c.caste[math.max(scr.etl.caste[i], 0)]
+        if caste then
+            local f = caste.flags
+            table.insert(pets, {
+                index = i,
+                creature = c.creature_id,
+                name = utf(c.name[0]),
+                caste = caste.caste_id,
+                profession = df.profession[scr.etl.profession[i]] or '',
+                value = caste.misc.petvalue,
+                grazer = f.GRAZER,
+                lays_eggs = f.LAYS_EGGS,
+                milkable = f.MILKABLE,
+                hunts_vermin = f.HUNTS_VERMIN,
+                count = chosen[i] or 0,
+            })
+        end
+    end
+    return pets
+end
+
 local function collect(scr)
     if not df.viewscreen_setupdwarfgamest:is_instance(scr) then
         local focus = scr and table.concat(dfhack.gui.getFocusStrings(scr), ',') or ''
@@ -182,6 +250,9 @@ local function collect(scr)
         local unit = scr.s_unit[i]
         table.insert(result.dwarves, collect_dwarf(i, info, unit))
     end
+
+    result.items, result.item_lines = collect_items(scr)
+    result.pets = collect_pets(scr)
 
     -- Faixas de atributos da casta (7 pontos: mínimo ... mediana (4º) ... máximo),
     -- usadas para dizer se um valor é alto ou baixo para um anão.

@@ -76,6 +76,17 @@
                     </DockPanel>
                 </Grid>
             </TabItem>
+            <TabItem Header="Itens e animais">
+                <ScrollViewer>
+                    <StackPanel Margin="12,8,28,28" Spacing="8">
+                        <TextBlock Classes="hint" IsVisible="{Binding !HasAnalysis}"
+                                   Text="Abra a tela Preparar com cuidado no jogo e clique em Atualizar. Os itens e animais escolhidos aparecem aqui." />
+                        <TextBlock Classes="hint" IsVisible="{Binding HasAnalysis}" TextWrapping="Wrap" MaxWidth="900" HorizontalAlignment="Left"
+                                   Text="Compre e troque itens e animais na tela do jogo; com Atualizar automaticamente ligado, a conferência acompanha. Para pedir uma opinião, mande o resumo (subaba Resumo) para a IA: ele já leva esta seção." />
+                        <controls:MarkdownView HorizontalAlignment="Left" Markdown="{Binding SuppliesMarkdown}" IsVisible="{Binding HasAnalysis}" />
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
             <TabItem Header="Resumo (IA)">
                 <ScrollViewer>
                     <StackPanel Margin="12,8,28,28" Spacing="16">

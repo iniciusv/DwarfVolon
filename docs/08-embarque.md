@@ -18,6 +18,7 @@ Nada é decidido automaticamente: funções e pontos vêm do jogador, de uma IA 
 | Subaba | Para quê |
 |---|---|
 | **Anões** | Lista à esquerda (nome, funções, alertas) e a ficha do anão à direita. No topo: **Sugerir funções para todos**, **Aplicar todos no jogo** e onde as decisões estão salvas |
+| **Itens e animais** | Conferência do básico para o primeiro ano, itens e animais escolhidos e os animais disponíveis (só leitura) |
 | **Resumo (IA)** | Os passos para conversar com uma IA e o resumo em Markdown (o que é copiado) |
 
 ### Ficha do anão
@@ -46,6 +47,35 @@ O DF só gera o texto da ficha quando ela está aberta no jogo. Ele fica em `gam
 - O `EmbarkSheetCache` guarda o texto por anão e por aba de personalidade durante a sessão do app. Com *Atualizar automaticamente* ligado, basta abrir a ficha de cada anão no jogo uma vez. O status mostra quantos anões já têm descrição.
 - Só a aba Personalidade é capturada (pelo `active_sub_tab`), para não guardar texto velho de outra aba.
 - O texto **não** vai para o resumo da IA (gastaria contexto e repete o que os números dizem).
+
+## Itens e animais
+
+A subaba **Itens e animais** lê o que foi comprado na tela do jogo e confere o básico. O app **só lê**: compras e trocas são feitas no jogo (com *Atualizar automaticamente*, a conferência acompanha). A mesma seção vai no resumo da IA, para pedir opinião sobre o que levar.
+
+Conferência (`Core/Embark/EmbarkSupplies.cs`, referências aproximadas):
+
+| Item | Regra |
+|---|---|
+| Picaretas | uma por **Minerador** do plano (sem funções decididas, a quantidade de `funcoes.json`) |
+| Machados | 1 para o lenhador + 1 por **Guarda (machado)** |
+| Bigorna | pelo menos uma (forja) |
+| Sementes | tem *plump helmet spawn* |
+| Bebida / comida | por anão: ok a partir de 8 bebidas e 6 comidas (o embarque padrão leva ~9 e ~6 para 7 anões) |
+| Médico | com **Médico** no plano: linha e tecido |
+| Animais | dica de gato (caça vermes); aviso de espécie útil sem casal; aviso de pasto para quem pasta |
+
+Campos do jogo: `s_item[linha]` são os itens de cada linha da lista (tipo, subtipo como `ITEM_WEAPON_PICK`, material como `PLANT:MUSHROOM_HELMET_PLUMP:SEED`, quantidade); `etl.list[linha]` são as opções da linha; `etl.race/caste/profession` são as opções de animais (98 no DF 53.17, com `PETVALUE` e as flags GRAZER, LAYS_EGGS, MILKABLE, HUNTS_VERMIN); `chosen_pet_index`/`chosen_pet_num` são os escolhidos.
+
+> **Ainda não conferido**: que `chosen_pet_index` aponta para a lista `etl.race` (a leitura foi feita sem animais escolhidos) e o custo em pontos de cada animal.
+
+### Escrever itens e animais no jogo (pesquisa, DF 53.17)
+
+- **Custo de um item** = `dfhack.items.getItemBaseValue(tipo, subtipo, mattype, matindex) × stack_size`. Conferido: os itens padrão somam 1120, exatamente os pontos gastos. (`getValue` dá 1540 porque soma as melhorias, como tingimento.)
+- Mudar `stack_size` de um item de `s_item` funciona, mas o jogo **não** recalcula `points_remaining`: quem escreve precisa ajustar os pontos.
+- Os itens de `s_item` são itens reais (estão em `world.items.all`, posição -30000, maker -1).
+- `dfhack.items.createItem(s_unit[0], ..., true)` **não cria nada** na tela de embarque (devolve `true`; as unidades ainda não estão no mapa).
+- **`df.item_<tipo>st:new()` derruba o jogo.** Não usar para criar itens.
+- Ainda sem caminho para criar um item novo (material que ainda não está na lista); `add_item_*` e `adding_item_flag` são do diálogo "adicionar item" do jogo e não foram testados.
 
 ## Decisões salvas por mundo
 
@@ -143,5 +173,6 @@ Linha de comando: `dotnet run --project tools/DwarfVolon.DfHackCli -- embark` (r
 - Conferir na tela do jogo as regras de custo depois da primeira aplicação (pontos do anão × pontos de embarque).
 - Fase 3: na fortaleza, designar os trabalhos pelas funções salvas (ex.: só os mineradores mineram).
 - Conferir o que as outras abas de personalidade da ficha do jogo geram (gostos, crenças) e se a captura pega.
-- Itens e animais do embarque.
+- Conferir `chosen_pet_index` com um animal escolhido e descobrir o custo em pontos de itens e animais.
+- Talvez: escrever itens e animais no jogo (hoje só lê).
 - Permitir funções do usuário em `%APPDATA%\DwarfVolon\` (como os modificadores do world gen).

@@ -153,6 +153,7 @@ public partial class EmbarkViewModel : ViewModelBase
     {
         if (_restoring || Analysis is null) return;
         SetMarkdown(EmbarkMarkdown.Build(Analysis, Plan));
+        SetSupplies(EmbarkSupplies.Build(Analysis, Plan));
         if (_planPath is null) return;
         try
         {
@@ -190,6 +191,10 @@ public partial class EmbarkViewModel : ViewModelBase
     [ObservableProperty]
     public partial string Markdown { get; private set; }
 
+    /// <summary>Subaba "Itens e animais": conferência e o que foi escolhido no jogo.</summary>
+    [ObservableProperty]
+    public partial string SuppliesMarkdown { get; private set; } = "";
+
     [ObservableProperty]
     public partial string StatusText { get; private set; } = "Ainda não lido.";
 
@@ -213,7 +218,7 @@ public partial class EmbarkViewModel : ViewModelBase
     /// <summary>Plano de pontos de todos os anões (editado na ficha ou colado da IA).</summary>
     public EmbarkPlan Plan { get; } = new();
 
-    /// <summary>Subaba escolhida (0 = Anões, 1 = Resumo/IA).</summary>
+    /// <summary>Subaba escolhida (0 = Anões, 1 = Itens e animais, 2 = Resumo/IA).</summary>
     [ObservableProperty]
     public partial int SelectedTab { get; set; }
 
@@ -312,6 +317,7 @@ public partial class EmbarkViewModel : ViewModelBase
             if (snapshot.State != EmbarkScreenState.Embark)
             {
                 Analysis = null;
+                SetSupplies("");
                 StatusText = $"{prefix}o jogo não está na tela de embarque";
                 SetMarkdown(EmbarkMarkdown.NotOnEmbarkScreen(snapshot.Screen));
                 return;
@@ -325,8 +331,10 @@ public partial class EmbarkViewModel : ViewModelBase
 
             // O Markdown sem as decisões tem todos os dados do jogo; com a versão das descrições capturadas,
             // diz se as fichas precisam ser refeitas (as decisões ficam no plano e não pedem refazer).
-            var signature = $"{Sheets.Version}\n{EmbarkMarkdown.Build(Analysis)}";
+            // Itens e animais ficam fora da assinatura: mudar a compra não refaz as fichas.
+            var signature = $"{Sheets.Version}\n{EmbarkMarkdown.Build(Analysis, includeSupplies: false)}";
             SetMarkdown(EmbarkMarkdown.Build(Analysis, Plan));
+            SetSupplies(EmbarkSupplies.Build(Analysis, Plan));
             if (signature == _lastSignature && Dwarves.Count == snapshot.Dwarves.Count) return;
             _lastSignature = signature;
             RebuildDwarves(Analysis);
@@ -372,6 +380,11 @@ public partial class EmbarkViewModel : ViewModelBase
     private void SetMarkdown(string markdown)
     {
         if (markdown != Markdown) Markdown = markdown;
+    }
+
+    private void SetSupplies(string markdown)
+    {
+        if (markdown != SuppliesMarkdown) SuppliesMarkdown = markdown;
     }
 
     private static readonly string IntroMarkdown = new MarkdownBuilder()

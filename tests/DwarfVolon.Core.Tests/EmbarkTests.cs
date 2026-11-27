@@ -241,3 +241,76 @@ public sealed class EmbarkTests
         Assert.Contains(schema.Columns, c => c.Key == "strength");
     }
 }
+
+public sealed class EmbarkSuppliesTests
+{
+    private const string Items =
+        ",\"items\":[" +
+        "{\"line\":15,\"type\":\"WEAPON\",\"subtype\":\"ITEM_WEAPON_PICK\",\"material\":\"INORGANIC:IRON\",\"name\":\"iron pick\",\"stack\":1}," +
+        "{\"line\":11,\"type\":\"WEAPON\",\"subtype\":\"ITEM_WEAPON_AXE_BATTLE\",\"material\":\"INORGANIC:COPPER\",\"name\":\"copper battle axe\",\"stack\":1}," +
+        "{\"line\":9,\"type\":\"SEEDS\",\"subtype\":\"\",\"material\":\"PLANT:MUSHROOM_HELMET_PLUMP:SEED\",\"name\":\"plump helmet spawn\",\"stack\":5}," +
+        "{\"line\":25,\"type\":\"DRINK\",\"subtype\":\"\",\"material\":\"PLANT:GRASS_WHEAT_CAVE:DRINK\",\"name\":\"dwarven beer\",\"stack\":30}," +
+        "{\"line\":29,\"type\":\"MEAT\",\"subtype\":\"\",\"material\":\"CREATURE:DONKEY:LUNG\",\"name\":\"prepared donkey lung\",\"stack\":3}]," +
+        "\"item_lines\":[{\"line\":15,\"type\":\"WEAPON\",\"subtype\":\"ITEM_WEAPON_PICK\",\"options\":5}]," +
+        "\"pets\":[" +
+        "{\"index\":0,\"creature\":\"CAT\",\"name\":\"cat\",\"caste\":\"FEMALE\",\"profession\":\"STANDARD\",\"value\":20,\"grazer\":false,\"lays_eggs\":false,\"milkable\":false,\"hunts_vermin\":true,\"count\":0}," +
+        "{\"index\":1,\"creature\":\"COW\",\"name\":\"cow\",\"caste\":\"FEMALE\",\"profession\":\"STANDARD\",\"value\":300,\"grazer\":true,\"lays_eggs\":false,\"milkable\":true,\"hunts_vermin\":false,\"count\":2}," +
+        "{\"index\":2,\"creature\":\"COW\",\"name\":\"cow\",\"caste\":\"MALE\",\"profession\":\"STANDARD\",\"value\":300,\"grazer\":true,\"lays_eggs\":false,\"milkable\":true,\"hunts_vermin\":false,\"count\":0}]}\n";
+
+    private static EmbarkSnapshot Snapshot() => EmbarkJson.Parse(EmbarkTests.SampleJson(dwarves: 2).TrimEnd()[..^1] + Items);
+
+    [Fact]
+    public void Parse_reads_items_and_pets()
+    {
+        var s = Snapshot();
+        Assert.Equal(5, s.Items.Count);
+        Assert.Equal(new EmbarkItem(15, "WEAPON", "ITEM_WEAPON_PICK", "INORGANIC:IRON", "iron pick", 1), s.Items[0]);
+        Assert.Single(s.ItemLines);
+        Assert.Equal(3, s.Pets.Count);
+        Assert.True(s.Pets[0].HuntsVermin);
+        Assert.Equal(2, s.Pets[1].Count);
+    }
+
+    [Fact]
+    public void Old_json_without_items_still_parses()
+    {
+        var s = EmbarkJson.Parse(EmbarkTests.SampleJson());
+        Assert.Empty(s.Items);
+        Assert.Empty(s.Pets);
+    }
+
+    [Fact]
+    public void Picks_follow_planned_miners()
+    {
+        var analysis = EmbarkAnalyzer.Analyze(Snapshot());
+        var plan = new EmbarkPlan();
+
+        // Sem funções decididas: usa a quantidade do catálogo (2 mineradores) e falta 1 picareta.
+        Assert.Equal(SupplyStatus.Warning, EmbarkSupplies.Check(analysis, plan).Single(c => c.Topic == "Picaretas").Status);
+
+        plan.SetRoles(analysis.Snapshot.Dwarves[0], ["minerador"]);
+        Assert.Equal(SupplyStatus.Ok, EmbarkSupplies.Check(analysis, plan).Single(c => c.Topic == "Picaretas").Status);
+    }
+
+    [Fact]
+    public void Checks_food_seeds_and_animals()
+    {
+        var checks = EmbarkSupplies.Check(EmbarkAnalyzer.Analyze(Snapshot()));
+
+        Assert.Equal(SupplyStatus.Ok, checks.Single(c => c.Topic == "Sementes").Status);
+        Assert.Equal(SupplyStatus.Ok, checks.Single(c => c.Topic == "Bebida").Status);   // 30 / 2 anões
+        Assert.Equal(SupplyStatus.Missing, checks.Single(c => c.Topic == "Comida").Status); // 3 / 2 anões
+        Assert.Contains(checks, c => c.Topic == "Casal" && c.Text.StartsWith("cow"));
+        Assert.Contains(checks, c => c.Topic == "Pasto");
+        Assert.Contains(checks, c => c.Topic == "Caçador de vermes");
+    }
+
+    [Fact]
+    public void Summary_includes_supplies_section()
+    {
+        var analysis = EmbarkAnalyzer.Analyze(Snapshot());
+        Assert.Contains("Itens e animais", EmbarkMarkdown.Build(analysis));
+        Assert.DoesNotContain("Itens e animais", EmbarkMarkdown.Build(analysis, includeSupplies: false));
+        Assert.Contains("iron pick", EmbarkSupplies.Build(analysis));
+    }
+}
